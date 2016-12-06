@@ -1,0 +1,326 @@
+﻿@*This view is  invoked for roles like 'CATT','CA','PC' *@
+@*This view contains the read-only header for Invoice Details, editable Approvers grid, editable comments grid and editable Attachments grid*@
+
+@using System.Collections
+@model eInvoiceAutomationWeb.ViewModels.RoutingDetailsViewModel
+
+<script src="@Url.Content("~/Scripts/CommonScripts.js")"></script>
+<script type="text/javascript">
+    var container, wnd, options;
+    // Add the div to initialize to the DOM
+    container = $('<div />').attr('id', 'window').appendTo(document.body);
+
+    $(document).ready(function () {
+        $.ajaxSetup({ cache: false });
+        var serialNo = $("#hdnFlag").val();
+        var docNo = $("#txtDocumentNo").text();
+
+        window.onbeforeunload = function (e) {
+            var grid = $("#EditableApproversGrid").data("kendoGrid");
+            if ((grid != null && grid.dataSource.hasChanges())) {
+                if (!confirm("View has unsaved changes, are you sure you want to leave the page?")) {
+                    e.preventDefault();
+                }
+            }
+        }
+
+        $("#btnHeaderReadOnlySave").click(function () {
+            //  alert('disabled called');
+            //   $(this).prop("Value", 'Please Wait...');
+            $("#btnHeaderReadOnlySave").prop("disabled", true);
+
+            // // Getting URL var by its nam
+            var SharedUser = getParameterByName('SharedUser');
+
+
+           // alert('s user name:' + SharedUser);
+
+            var approverRole
+            //if (document.getElementById('chkNonContractingStatus').checked) {
+            if ($("#ddlInvoiceType").data("kendoDropDownList").value() == "NonContract") {
+                approverRole = $("#ddlApproverRolesNonContracting").data("kendoDropDownList");
+            }
+            else if ($("#ddlInvoiceType").data("kendoDropDownList").value() == "Contract") {
+                approverRole = $("#ddlApproverRoles").data("kendoDropDownList");
+            }
+            else {
+                approverRole = $("#ddlApproverRolesManual").data("kendoDropDownList");
+            }
+            var value = approverRole.value();
+
+            if (value == 0) {
+                alert("Please select an Action from the dropdown");
+                $("#btnHeaderReadOnlySave").prop("disabled", false);
+            }
+            else {
+                var button = $("#btnHeaderReadOnlySave");
+                var content = button.val();
+
+                // code which gets excecuted for 'Submit w/o Approval' button click
+                if (content == "Submit w/o Approval") {
+                    $.getJSON('@Url.Action("Validate", "RoutingDetails")', { RouteTo: value, isReadOnly: false, DocumentNo: docNo, SN: serialNo }, function (data) {
+                    if (data == true) {
+                        options = {
+                            title: "Validation Summary",
+                            content: {
+                                url: "@Url.Action("DisplayValidations", "RoutingDetails")",
+                            },
+                            modal: true,
+                            visible: false,
+                            position: {
+                                top: "45%",
+                                left: "30%"
+                            }
+                        };
+                        wnd = container.kendoWindow(options).data('kendoWindow').open();
+                        $("#btnHeaderReadOnlySave").prop("disabled", false);
+                    }
+                    else {
+                        var comment = $("#Comment").val();
+                        if (comment == null || comment == '') {
+                            alert('This action needs Comments, please provide them in Comments section !');
+                            $("#btnHeaderReadOnlySave").prop("disabled", false);
+                        }
+                        else {
+                            $.getJSON('@Url.Action("Submit", "RoutingDetails")', {
+                                RouteTo: value, isReadOnly: false, serialNo: serialNo, documentNo: docNo,
+                                Comment: comment, SharedUser: SharedUser
+                            }, function (data) {
+                                alert("Your eInvoice request has been submitted successfully!");
+                                location.href = '@Url.Content("~/AdminTools/Dashboard")';
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                $.getJSON('@Url.Action("ValidateApproveClick", "RoutingDetails")', { documentNo: docNo, isReadOnly: false, SN: serialNo }, function (data) {
+                    if (data == true) {
+                        options = {
+                            title: "Validation Summary",
+                            content: {
+                                url: "@Url.Action("DisplayValidations", "RoutingDetails")",
+                            },
+                            modal: true,
+                            visible: false,
+                            position: {
+                                top: "45%",
+                                left: "30%"
+                            }
+                        };
+                        wnd = container.kendoWindow(options).data('kendoWindow').open();
+                        $("#btnHeaderReadOnlySave").prop("disabled", false);
+                    }
+                    else if (data == false) {
+                        var grid = $("#EditableApproversGrid").data("kendoGrid");
+                        if (grid.dataSource.hasChanges())
+                            dirty = true;
+                        else
+                            dirty = false;
+
+                        if (dirty) {
+                            alert("Approvers Grid has unsaved changes. Please save/cancel them before Approving.");
+                            $("#btnHeaderReadOnlySave").prop("disabled", false);
+                        }
+                        else {
+                            var comment = $("#Comment").val();
+                            $.getJSON('@Url.Action("Approve", "RoutingDetails")', { serialNo: serialNo, documentNo: docNo, Comment: comment, SharedUser: SharedUser }, function (data) {
+                                if (parseInt(data) === "NAN") {
+                                    alert(data);
+                                    $("#btnHeaderReadOnlySave").prop("disabled", false);
+                                }
+                                else {
+                                    alert("Your eInvoice request has been submitted successfully!");
+                                    location.href = '@Url.Content("~/AdminTools/Dashboard")';
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        alert(data);
+                        $("#btnHeaderReadOnlySave").prop("disabled", false);
+                    }
+                });
+            }
+        }
+        });
+    });
+
+function openWindow(url, title) {
+    window.open(url, '_blank');
+}
+
+var resizeDropDown = function (e) {
+    var $dropDown = $(e.sender.element),
+    dataWidth = $dropDown.data("kendoDropDownList").list.width(),
+    listWidth = dataWidth + 20,
+    containerWidth = listWidth + 6;
+
+    // Set widths to the new values
+    $dropDown.data("kendoDropDownList").list.width(listWidth);
+    $dropDown.closest(".k-widget").width(containerWidth);
+}
+
+
+function onActionChange(e) {
+    if ((e.sender.text()) == "- select an Action -") {
+        document.getElementById("btnHeaderReadOnlySave").value = "Submit w/o Approval";
+    }
+    else {
+        var selectedValue = $(e.sender.text());
+        if (selectedValue.selector.toString() == "Approved - Move to next level Approver")
+            document.getElementById("btnHeaderReadOnlySave").value = "Submit";
+        else
+            document.getElementById("btnHeaderReadOnlySave").value = "Submit w/o Approval";
+    }
+}
+
+</script>
+
+<div class="container-fluid border-box-sizing">
+         <div class="row" style="width:100%">
+            <div class="col-sm-3">
+                @Html.Label("Document No: ", new { @class = "thick" })
+                <label id="txtDocumentNo">@Model.DocumentNo.ToString()</label>
+                @if (Model.InvoiceDetails!=null)
+                {
+                    if(Model.InvoiceDetails.Status!="Rejected")
+                    {
+                        <a href="@Url.Action("GeneratePDF","eInvoicePDF", new { DocumentNo=Model.DocumentNo.ToString()})"  target="_blank" style="margin-left:10px">
+                            <img src="~/Content/Images/Misc/print-button.png" value="Print" id="btnPrint" height="25" width="25" title="Print Preview"/>
+                        </a>
+                    }
+                }
+                <input type="hidden" value="@Model.SN" id="hdnFlag" />
+             </div>
+            <div class="col-sm-3">
+                @* SM 03/16/2016 - Phase 2*@
+                @* SM 10/17/2016 - Phase 3*@
+                @Html.Label("Invoice Type: ", new { @class = "thick" })
+                <span id="divNoContractInvoice">
+                    @(Html.Kendo().DropDownList()
+                            .Name("ddlInvoiceType")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            //.Events(e => e.Change("onNonContractingStatusChange"))
+                            .BindTo(new List<SelectListItem>() {
+                                new SelectListItem() {
+                                    Text = "- select an Action -",
+                                    Value = "-1"
+                                },
+                                new SelectListItem() {
+                                    Text = "Contracting",
+                                    Value = "Contract"
+                                },
+                                new SelectListItem() {
+                                    Text = "Non-Contracting",
+                                    Value = "NonContract"
+                                },
+                                new SelectListItem() {
+                                    Text = "Manual Routing",
+                                    Value = "Manual"
+                                }
+                            })
+                            .Value(@Model.InvoiceDetails.InvoiceType.ToString())
+                            //.Value(@Model.InvoiceDetails.NonContractingStatus.ToString())
+                            .Enable(false)
+                    )
+                </span>
+
+            </div>
+          
+            <div class="col-sm-6">
+              @* 07/01/2015 - Post UAT Changes - Build 8*@
+               
+                @Html.ActionLink("View Invoice Documents", "ViewSharePointInvoices", "RoutingDetails",
+                             new { DocumentNo = @Model.DocumentNo.ToString(),
+                                   VendorNo = @Model.InvoiceDetails.VendorNo.ToString(),
+                                 InvoiceNo = @Model.InvoiceDetails.InvoiceNo.ToString() }, 
+                             new { target = "_blank" })
+                &nbsp; &nbsp;
+                @Html.Label("Action: ", new { @class = "thick" })
+                <span id="spanDDLContract">
+                    @(Html.Kendo().DropDownList()
+                           .Name("ddlApproverRoles").HtmlAttributes(new { @Style = "height:80%; margin:0px 0px 4px 0px;" })
+                           .DataValueField("ActionId")
+                           .DataTextField("ActionName")
+                           .BindTo((IEnumerable)ViewBag.InvoiceStatusApproverRoles)
+                           .Events(e =>
+                            {
+                                e.Change("onActionChange");
+                                e.DataBound("resizeDropDown");
+                            })
+                           .OptionLabel("- select an Action -"))
+                </span>
+                <span id="spanDDLNonContract" style="display:none">
+                    @(Html.Kendo().DropDownList()
+                            .Name("ddlApproverRolesNonContracting").HtmlAttributes(new { @Style = "height:80%; margin:0px 0px 4px 0px" })
+                           .DataValueField("ActionId")
+                           .DataTextField("ActionName")
+                            .BindTo((IEnumerable)ViewBag.InvoiceStatusApproverRolesNonContracting)
+                           .Events(e =>
+                            {
+                                e.Change("onActionChange");
+                                e.DataBound("resizeDropDown");
+                            })
+                           .OptionLabel("- select an Action -"))
+                </span>
+                <span id="spanDDLManual" style="display:none">
+                    @(Html.Kendo().DropDownList()
+                            .Name("ddlApproverRolesManual").HtmlAttributes(new { @Style = "height:80%; margin:0px 0px 4px 0px" })
+                           .DataValueField("ActionId")
+                           .DataTextField("ActionName")
+                           .BindTo((IEnumerable)ViewBag.InvoiceStatusApproverRolesManual)
+                           .Events(e =>
+                            {
+                                e.Change("onActionChange");
+                                e.DataBound("resizeDropDown");
+                            })
+                           .OptionLabel("- select an Action -"))
+                </span>
+                  <input type="button" value="Submit w/o Approval" id="btnHeaderReadOnlySave" class="btn-primary" title="Click here to Proceed" />
+             </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+                @Html.Partial("~/Views/Shared/_InvoiceDetailsReadOnlyForRoutingDetails.cshtml", Model)
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+                @Html.Partial("~/Views/RoutingDetails/_EditableApproversGrid.cshtml", Model)
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+                @Html.Partial("~/Views/RoutingDetails/_EditableAttachmentsandComments.cshtml", Model)
+            </div>
+         </div>
+ </div>
+
+<script>
+    // SM 03/14/2016 - Show the correct DDL
+    // SM 10/17/2016 - Use DDL instead of check box for Invoice Type
+
+    var dropdown = $("#ddlInvoiceType").data("kendoDropDownList");
+    if (dropdown != null)
+        selectedValue = dropdown.value();
+
+    if (selectedValue == "NonContract") {
+        $('#spanDDLContract').hide();
+        $('#spanDDLManual').hide();
+        $('#spanDDLNonContract').show();
+    }
+    else if (selectedValue == "Contract") {
+        $('#spanDDLContract').show();
+        $('#spanDDLNonContract').hide();
+        $('#spanDDLManual').hide();
+    }
+    else if (selectedValue == "Manual") {
+        $('#spanDDLManual').show();
+        $('#spanDDLContract').hide();
+        $('#spanDDLNonContract').hide();
+    }
+
+
+</script>

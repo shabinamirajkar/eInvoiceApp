@@ -1,0 +1,236 @@
+﻿
+@{
+    ViewBag.Title = "RolesAdmin";
+    ViewBag.Title = "Roles Admin - eInvoice Automation";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<p><h4>Roles Admin</h4></p>
+
+@(Html.Kendo().Grid<eInvoiceApplication.DomainModel.AdminRoleForCRUD>()
+    .Name("ConfigAdmin")
+    .Columns(columns =>
+    {
+        columns.Bound(p => p.AdminRoleID).Visible(false);
+        columns.Bound(p => p.RoleAbbreviation).Width(50).EditorTemplateName("_RoleAbbreviation").Title("Role").ClientTemplate("#: RoleAbbreviation #");
+        columns.Bound(p => p.ApproverUserID).Width(50).EditorTemplateName("_ApproverName").Title("Approver").ClientTemplate("#: ApproverName #");
+        columns.Command(command => { command.Destroy(); }).Width(172);
+    })
+    .ToolBar(toolbar => toolbar.Create())
+    .ToolBar(toolbar => toolbar.Save())
+    .Editable(editable => editable.Mode(GridEditMode.InCell))
+                  .Sortable()
+                  .Pageable()
+                  .Navigatable()
+                  .AutoBind(true)
+                  .Scrollable(s => s.Height("auto"))
+                  .DataSource(dataSource =>
+                   dataSource.Ajax()
+                  .PageSize(10)
+                  .Batch(true)
+                  .ServerOperation(false)
+                 // .AutoSync(true)
+                  .Events(events => events.Sync("onSyncEnd"))
+                  //    .Events(events => events.Change("onDataSourceChange"))
+                  .Model(model =>
+                        {
+                            model.Id(p => p.AdminRoleID);
+                        })
+                    .Create(update => update.Action("ConfigAdmin_Create", "AdminTools"))
+                    .Read(read => read.Action("ConfigAdmin_Read", "AdminTools"))
+                    .Update(update => update.Action("ConfigAdmin_Update", "AdminTools"))
+                    .Destroy(update => update.Action("ConfigAdmin_Destroy", "AdminTools"))
+                     )
+                  )
+    
+   @*// .AutoBind(true)
+    .Editable(editable => editable.Mode(GridEditMode.InCell))
+    .Pageable()
+    .Pageable()
+    .Navigatable()
+    .Scrollable(s => s.Height("auto"))
+            .DataSource(dataSource =>
+             dataSource.Ajax()
+            .PageSize(10)
+            .Batch(true)
+            .ServerOperation(false)
+            .Events(events => events.RequestEnd("onRequestEnd"))
+            .Model(model => model.Id(p => p.AdminRoleID))
+            .Create(update => update.Action("ConfigAdmin_Create", "AdminTools"))
+            .Read(read => read.Action("ConfigAdmin_Read", "AdminTools"))
+            .Update(update => update.Action("ConfigAdmin_Update", "AdminTools"))
+            .Destroy(update => update.Action("ConfigAdmin_Destroy", "AdminTools"))
+    )
+)*@
+
+    
+<script type="text/javascript">
+    var editRow; //This should be Global variable
+
+    function onChange(e) {
+        var selectedValue = $(e.sender.text());
+        var grid = $("#ConfigAdmin").data("kendoGrid");
+        var editRow = grid.tbody.find("tr:has(.k-edit-cell)");
+        var currentDataItem = grid.dataItem(editRow);
+        if (selectedValue.selector.toString() == null || selectedValue.selector.toString() == "- please select -")
+            currentDataItem.set("RoleAbbreviation", "");
+        else
+        currentDataItem.set("RoleAbbreviation", selectedValue.selector.toString());
+    }
+
+    function onApproverNameChange(e) {
+        var selectedValue = $(e.sender.text());
+        var grid = $("#ConfigAdmin").data("kendoGrid");
+        var editRow = grid.tbody.find("tr:has(.k-edit-cell)");
+        var currentDataItem = grid.dataItem(editRow);
+        if (selectedValue.selector.toString() == null || selectedValue.selector.toString() == "- please select -")
+            currentDataItem.set("ApproverName", "");
+        else
+            currentDataItem.set("ApproverName", selectedValue.selector.toString());
+    }
+
+    $(document).ready(function () {
+        window.onbeforeunload = function (e) {
+            var grid = $("#ConfigAdmin").data("kendoGrid");
+            if (grid != null) {
+                ds = grid.dataSource;
+                var dirty = false;
+                $.each(ds._data, function () {
+                    if (this.dirty == true) {
+                        dirty = true;
+                    }
+                });
+                if (ds._destroyed.length > 0)
+                    dirty = true;
+                if (dirty) {
+                    if (!confirm("View has unsaved changes, are you sure you want to leave the page?")) {
+                        e.preventDefault();
+                    }
+                }
+            }
+        }
+    });
+
+    function onSyncEnd(e) {
+      //  alert(e.type);
+       // if ((e.type == "create" || e.type == "update") && !e.response.Errors) {
+            alert("Record(s) saved successfully");
+            $("#ConfigAdmin").data("kendoGrid").dataSource.read();
+       // }
+        //if (e.type == "destroy" && !e.response.Errors) {
+        //    alert("Record(s) saved successfully");
+        //    $("#ConfigAdmin").data("kendoGrid").dataSource.read();
+        //}
+        
+    }
+
+
+    //function onDataSourceChange(e) {
+    // //  
+    //  //  alert(e.action);
+    //   // alert(e.field);
+    //    if (e.action === "itemchange") {
+    //   //     $("#ConfigAdmin").data("kendoGrid").editable.validatable.validate();
+    //    //    alert(e.field);
+    //    //    if (e.field === "ApproverUserID") {
+    //    //        var model = e.items[0];
+    //    //        model.set("RateVariance", model.InvoiceRate - model.ApprovedRate);
+    //    //        model.RateVariance = model.InvoiceRate - model.ApprovedRate;
+    //    //        model.set("Total", model.RateVariance * model.InvoiceHours);
+    //    //        model.Total = model.RateVariance * model.InvoiceHours;
+    //    //    }
+    //        //else if (e.field === "InvoiceHours" || e.field === "ApprovedHours") {
+    //        //    var model = e.items[0];
+    //        //    model.set("VarianceHours", model.InvoiceHours - model.ApprovedHours);
+    //        //    model.VarianceHours = model.InvoiceHours - model.ApprovedHours;
+    //        //}
+    //    }
+    //}
+    //$('.k-grid-save-changes').on("click", function () {
+    //    var grid = $("#ConfigAdmin").data("kendoGrid");
+    //    alert('validaion');
+    //    if (grid.editable && !grid.editable.validatable.validate()) {
+    //   // What ever you want to do
+
+    //    alert('validaion');
+    //    //ds = grid.dataSource;
+    //    //var dirty = false;
+    //    //$.each(ds._data, function () {
+    //    //    if (this.ApproverUserID == "") {
+    //    //        dirty = true;
+    //    //    }
+    //    //});
+    //    //if (dirty) {
+    //    //    alert('Approver is empty');
+    //    //        e.preventDefault();
+    //    //        return false;
+    //    //}
+    //        e.preventDefault();
+    //        return false;
+    //    }
+    //});
+
+    ////Custom validation
+    //$("#grid").kendoValidator({
+    //    rules: {
+    //        // custom rules
+    //        custom: function (input, params) {
+    //            if (input.is("[name=ApproverUserID]") || input.is("[name=RoleID]")) {
+
+    //                //If the input is StartDate or EndDate
+    //                var container = $(input).closest("tr");
+
+    //                var start = container.find("input[name=ApproverUserID]").value();
+    //                var end = container.find("input[name=RoleID]").value();
+
+
+    //                if (start=="") {
+    //                    return false;
+    //                }
+    //            }
+    //            //check for the rule attribute
+    //            return true;
+    //        }
+    //    },
+    //    messages: {
+    //        custom: function (input) {
+    //            // return the message text
+    //            return "Approver Name is Empty!";
+    //        }
+    //    }
+    //})
+
+    ///* Wire validation */
+    //(function ($, kendo) {
+    //    $.extend(true, kendo.ui.validator, {
+    //        rules:
+    //          {
+    //              Approver: function (input) {
+    //                  if (input.is(" [name='ApproverName']") && input.val() == "- please select -") {
+    //                      return false;
+    //                  }
+    //                  return true;
+    //              },
+    //              RoleName: function (input) {
+    //                  if (input.is("[name='RoleAbbreviation']") && input.val() == "- please select -") {
+    //                      alert('Test');
+    //                      return false;
+    //                  }
+    //                  return true;
+    //              }
+    //          },
+    //        messages:
+    //        {
+    //            Approver: function (input) {
+    //                return "Please select a valid Approver";
+    //            },
+    //            RoleName: function (input) {
+    //                return "Please select a valid Role";
+    //            }
+    //        }
+    //    });
+    //})(jQuery, kendo);
+
+</script>
+
+

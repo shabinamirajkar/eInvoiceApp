@@ -1,0 +1,364 @@
+﻿@*Shared View of Attachments and Comments grids*@
+
+@model eInvoiceAutomationWeb.ViewModels.RoutingDetailsViewModel
+<link href="@Url.Content("~/Content/Custom.css")" rel="stylesheet" type="text/css" />
+
+<script>
+    var errorShown = false;
+
+    function OnSuccess(e) {
+        $(".k-upload-files.k-reset").find("li").parent().remove();
+        alert("Attachment uploaded successfully");
+        var grid = $("#AttachmentsGrid").data("kendoGrid");
+        if (grid != null)
+            grid.dataSource.read();
+    }
+
+    function refreshAttachGrid() {
+        $(".k-upload-files.k-reset").find("li").parent().remove();
+        alert("Attachment uploaded successfully");
+        var grid = $("#AttachmentsGrid").data("kendoGrid");
+        if (grid != null)
+            grid.dataSource.read();
+    }
+
+    function OnUpload(e) {
+        var files = e.files;
+        $.each(files, function (index,value) {
+            var ie = api.isIE();
+            if((ie && ie > 9) || (ie == false)) {
+                if (this.size > 0) {
+                    if ((this.size / 1024) > 2048) {
+                        alert("Maximum file size should be 2 MB only.");
+                        e.preventDefault();
+                    }
+                    else if(value.extension == ".js" || value.extension == ".vbs" || value.extension == ".map")  {
+                        alert("Cannot attach files with extensions  "+value.extension);
+                        e.preventDefault();
+                    }
+                }
+                else  {
+                    alert("You have to select a file which has data.");
+                    e.preventDefault();
+                }
+            }
+        });
+    }
+
+    function onError(e) {
+        var err = e.XMLHttpRequest.responseText;
+    }
+
+    function onSelect(e) {
+        $("#files").parents(".t-upload").find(".t-upload-files").remove()
+        //var err = e.XMLHttpRequest.responseText;
+        //e.
+        //$("#files").kendoUpload({
+        //    enabled: false,
+        //    enabled: true
+        //});
+    }
+
+    $(document).ready(function () {
+
+        $.ajaxSetup({ cache: false });
+
+        $(function () {
+            var upload = $("#files").data("kendoUpload");
+            if (upload != null) {
+                $.extend(upload.options.localization, {
+                    headerStatusUploading: "",
+                    headerStatusUploaded: "",
+                    statusUploaded: "",
+                });
+            }
+        });
+    });
+
+
+    function deleteRow(e) {
+        var userName = @Html.Raw(Json.Encode(ViewBag.LoginUser));
+        e.preventDefault ? e.preventDefault() : e.returnValue = false;
+        var grid = $("#AttachmentsGrid").data("kendoGrid");
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var uploadedUser = dataItem.UploadedUserID;
+        if(uploadedUser != dataItem.LoggedUserID)
+            alert("This attachment was uploaded by another user and it cannot be deleted.");
+        else  {
+            grid.removeRow($(e.target).closest("tr"));
+            grid.dataSource.sync();
+        }
+    }
+
+
+    function OnError(e, status) {
+        if (e.errors) {
+            var message = "Error:\n";
+            var grid = $('#AttachmentsGrid').data('kendoGrid');
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        if (key == "Delete" ) {
+                            message += this + "\n";
+                            alert(message);
+                            $('#AttachmentsGrid').data('kendoGrid').dataSource.read();
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+
+    $("#Comment").focusout(function () {
+        // var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@()]/);
+        // if($(this).val() != null && $(this).val() != '' && !(pattern.test($(this).val())))
+        if($(this).val() != null && $(this).val() != '')  {
+            $.getJSON('@Url.Action("SaveComment", "RoutingDetails")', { Comment: $(this).val() }, function (data) {
+                // var grid = $("#CommentsGrid").data("kendoGrid");
+                //if (grid != null)
+                //    grid.dataSource.read();
+            });
+        }
+        //else {
+        //    if ($(this).val() != '')
+        //      alert("Please enter valid characters in Comments without using any special characters except -,.");
+        //}
+    });
+
+
+    //function to determine whether the browser is IE
+    var api = {
+        isIE: function() {
+            var myNav = navigator.userAgent.toLowerCase();
+            return (myNav.indexOf('msie') != -1) ? parseInt(myNav.split('msie')[1]) : false;
+        }
+    }
+
+    @*  SM Test 1 for Upload functionality
+        $('#txtUploadFile').on('change', function (e) {
+        var files = e.target.files;
+        if (files.length > 0) {
+            if (window.FormData !== undefined) {
+                var data = new FormData();
+                for (var x = 0; x < files.length; x++){
+                    data.append("file" + x, files[x]);
+                }
+              
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UploadAttachments", "RoutingDetails")',
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    success: function(result) {
+
+                    },
+                    error: function (xhr, status, p3, p4){
+                        var err = "Error " + " " + status + " " + p3 + " " + p4;
+                        if (xhr.responseText && xhr.responseText[0] == "{")
+                            err = JSON.parse(xhr.responseText).Message;
+
+                    }
+                });
+            } else {
+                alert("This browser doesn't support HTML5 file uploads!");
+            }
+        }
+    });*@
+
+    @*  SM Test 2 for Upload functionality
+        $("#fuPDFAdd").change(function () {
+        var file = this.files[0];
+        fileName = file.name;
+        size = file.size;
+        type = file.type;
+        $("#txtuploadedMsgAdd").text("");
+        $("#btnUploadAdd").show();
+
+    });
+
+    $("#btnUploadAdd").click(function () {
+
+       
+        var formData = new FormData($('#frmUplaodFileAdd')[0]);
+        $.ajax({
+            url: '@Url.Action("UploadAttachments", "RoutingDetails")',  //Server script to process data
+            type: 'POST',
+            xhr: function () {  // Custom XMLHttpRequest
+                var myXhr = $.ajaxSettings.xhr();
+                if (myXhr.upload) { // Check if upload property exists
+                    myXhr.upload.addEventListener('progress',
+                    progressHandlingFunction, false); // For handling the progress of the upload
+                }
+                return myXhr;
+            },
+            data: formData,
+            //Options to tell jQuery not to process data or worry about content-type.
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+    });
+
+    //If file is successfully uploaded, label is updated with message
+    function progressHandlingFunction(e) {
+        if (e.lengthComputable) {
+            $("#divAddInforamtionDialog").show();
+            $("#txtuploadedMsgAdd").text("  " + fileName + " uploaded successfully");
+        }
+    }*@
+
+    function openWindow(url, title) {
+        window.open(url, '_blank');
+    }
+
+    function mypopup(url, title)
+    {
+        var winWidth=180;
+        var winHeight=120;
+        var left = (screen.width/2)-(winWidth/2);
+        var top = (screen.height/2)-(winHeight/2);
+        mywindow = window.open(url, title, 'location=0,status=0,scrollbars=0, toolbar=0,menubar=0,  width=' + winWidth +' ,height=' + winHeight + ', top='+top+', left='+left);
+        
+        //return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+        //mywindow.moveTo(0, 0);
+    }
+
+</script>
+
+<div id="form" class="container-fluid border-box-sizing">
+    <div style="height:20px;"></div>
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("Comments", new { @class = "thick" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            @if (Model.Comment == null)
+            {
+                Model.Comment = string.Empty;
+            }
+            <textarea id="Comment" style="width: 90%;" class="custom-input" maxlength="1000">@Model.Comment</textarea>
+        </div>
+    </div>
+    <div style="height:10px;"></div>
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("Comments History", new { @class = "thick" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.CommentsViewModel>()
+                        .Name("CommentsGrid")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.InvoiceCommentID).Visible(false);
+                             columns.Bound(p => p.CommentDate).Width(30);
+                             columns.Bound(p => p.Comment).Width(250);
+                             columns.Bound(p => p.CommentBy).Width(30);
+                         })
+                           .Sortable()
+                           .Pageable()
+                           .Navigatable()
+                           .AutoBind(true)
+                           .DataSource(dataSource =>
+                               dataSource.Ajax()
+                              .PageSize(10)
+                              .ServerOperation(false)
+                              .Model(model =>
+                               {
+                                   model.Id(p => p.InvoiceCommentID);
+                               })
+                             .Read(read => read.Action("Comments_Read", "RoutingDetails"))
+                      ))
+        </div>
+    </div>
+<div>
+
+</div>
+        @*  SM Test 1 for Upload functionality
+            <div class="row">
+            <div class="col-sm-12">
+                <input type="file" name="UploadFile" id="txtUploadFile" />
+            </div>
+        </div>*@
+
+    @*  SM Test 2 for Upload functionality
+        <div id="divUploadFileAdd">
+        <form enctype="multipart/form-data" id="frmUplaodFileAdd">
+
+            @Html.AntiForgeryToken()
+            <input id="fuPDFAdd" name="file" type="file" />
+            <input class="gbtn" id="btnUploadAdd" type="button" value="Upload" />
+            <label id="txtuploadedMsgAdd"> </label>
+
+        </form>
+    </div>*@
+
+    <div class="row">
+        <div class="col-sm-4">
+           
+            <a href="javascript: mypopup('@Url.Action("RoutingDetailsUploadFile", "RoutingDetails")', 'Upload Attachment')">
+                Upload Attachment
+            </a>
+        </div>
+        <div class="col-sm-8">
+        </div>
+    </div>
+
+        <div class="row">
+            <div class="col-sm-2" style="vertical-align:central;width:30px;margin:20px 0px 0px 0px">
+                @Html.Label("Attachments:", new { @class = "thick" })
+            </div>
+            <div class="col-sm-2" style="vertical-align:central;margin:0px 0px 0px 60px">
+                @(Html.Kendo().Upload()
+               .Name("files")
+               .Messages(m => m.Select("Select upload file"))
+               .ShowFileList(false)
+               .Multiple(false)
+               .Events(events => events.Error("onError").Success("OnSuccess").Upload("OnUpload").Select("onSelect"))
+               .Async(a => a.Save("SaveAttachment", "RoutingDetails").AutoUpload(true)))
+            </div>
+            <div class="col-sm-8">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.AttachmentsViewModel>()
+              .Name("AttachmentsGrid")
+               .Columns(columns =>
+                  {
+                      columns.Bound(p => p.InvoiceAttachmentID).Visible(false);
+                      columns.Bound(p => p.FileName).ClientTemplate("<a href='" + Url.Action("DownloadAttachment", "RoutingDetails", new { attachmentID = "#=InvoiceAttachmentID#" }) + "'>#=FileName#</a>");
+                      columns.Bound(p => p.UploadedUserID);
+                      columns.Command(command => command.Custom("Delete").Click("deleteRow"));
+                  })
+                  .Editable(editable => editable.Mode(GridEditMode.InLine))
+                  .Sortable()
+                  .Pageable()
+                  .Navigatable()
+                  .DataSource(dataSource =>
+                        dataSource.Ajax()
+                       .Events(e => e.Error("OnError"))
+                       .PageSize(10)
+                       .ServerOperation(false)
+                       .Model(model =>
+                         {
+                             model.Id(p => p.InvoiceAttachmentID);
+                         })
+                       .Read(read => read.Action("Attachments_Read", "RoutingDetails"))
+                       .Destroy(destroy => destroy.Action("Attachments_Destroy", "RoutingDetails"))
+            ))
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+

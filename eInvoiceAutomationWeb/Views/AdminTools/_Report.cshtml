@@ -1,0 +1,202 @@
+﻿@using Kendo.Mvc.UI
+
+
+<div class="row">
+    <div class="col-sm-12">
+        Report
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function GetFilterReportData() {
+        return {
+            DateFrom: $("#datepickerFrom1").val(),
+            DateTo: $("#datepickerTo1").val(),
+            Status: $("#ddlStatus").val(),
+            Access: $('input:radio[name="radioInvoices"]:checked').val(),
+            SubmittedBy: $("#ddlSubmittedBy").val(),
+        };
+    }
+    $("#btnSubmit2").click(function () {
+        // code which gets excecuted for 'Submit' button click
+        $("#ReportGrid").data("kendoGrid").dataSource.fetch();
+        $("#divReportGrid").show();
+    });
+
+
+    function onStatusChange(e) {
+        if (e.sender.text() == "Complete")
+        {
+            $("label[for='LBLSubmittedDT']").html('Completed Date Range: ');
+        }
+        else
+        {
+            $("label[for='LBLSubmittedDT']").html('Submitted Date Range: ');
+        }
+    }
+
+</script>
+
+    <div id="form" class="container-fluid border-box-sizing">
+        <div class="row">
+            <div class="col-sm-12 divClassHeader">
+                <div style="height:5px;"></div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <label for="LBLSubmittedDT" class="thick">Submitted Date Range: </label>
+                    </div>
+                    <div class="col-sm-4">
+                        @(Html.Kendo().DatePicker()
+                            .Value(DateTime.Now.AddMonths(-6))
+                            .Name("datepickerFrom1")
+                            .HtmlAttributes(new { style = "width:150px" }))
+                        @(Html.Kendo().DatePicker()
+                            .Name("datepickerTo1")
+                             .Value(DateTime.Today)
+                            .HtmlAttributes(new { style = "width:150px" }))
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div style="height:5px;"></div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        @Html.Label("Status: ", new { @class = "thick" })
+                    </div>
+                    <div class="col-sm-4">
+                        @(Html.Kendo().DropDownList()
+                        .Name("ddlStatus")
+                        .DataValueField("RoleAbbreviation")
+                        .DataTextField("RoleAbbreviation")
+                        .BindTo((System.Collections.Generic.List<eInvoiceApplication.DomainModel.StatusReportDropdown>)ViewBag.ReportDDLstatus)
+                        .Events(e => e.Change("onStatusChange"))
+                        )
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div style="height:5px;"></div>
+
+                <div class="row">
+                    <div class="col-sm-2">
+                        @Html.Label("Submitted By:", new { @class = "thick" })
+                    </div>
+                    <div class="col-sm-6">
+
+                        @(Html.Kendo().DropDownList()
+                        .Name("ddlSubmittedBy").HtmlAttributes(new { @Style = "width:55%; margin:0px 0px 4px 0px" })
+                        .DataValueField("UserID")
+                        .DataTextField("DistinguishedName")
+                        .BindTo((System.Collections.Generic.List<SAPSourceMasterApplication.DomainModel.ExchangeEmployeeProfile>)ViewBag.MemoryApprovers)
+                        )
+
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+
+                <div style="height:5px;"></div>
+
+                <div class="row" style="visibility:@ViewBag.HideAccessOption">
+                    <div class="col-sm-2">
+                        @Html.Label("Access:", new { @class = "thick" })
+                    </div>
+                    <div class="col-sm-4">
+                        <input type='radio' name="radioInvoices" checked="checked" value="AllInvoices" /> @Html.Label("All Invoices", new { @class = "thick" })
+                        <input type='radio' name="radioInvoices" value="MyInvoices" /> @Html.Label("My Invoices", new { @class = "thick" })
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+
+
+                <div style="height:5px;"></div>
+                <div class="row">
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="button" value="Search" id="btnSubmit2" class="btn-primary" title="Search" />
+
+                    </div>
+                    <div class="col-sm-2">
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div style="height:5px;"></div>
+                <div class="row">
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+       </div>
+
+
+
+    <div id="divReportGrid" style="display:none">
+        @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.DashboardReport>()
+                        .Name("ReportGrid")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.ContractNo).Encoded(false).Title("Contract/PO").Width("10%");
+                             columns.Bound(p => p.DocumentNo).Title("Document #").Width("5%");
+                             columns.Bound(p => p.VendorName).Title("Vendor Name").Width("15%");
+                             columns.Bound(p => p.VendorNo).Title("Vendor #").Width("5%");
+                             columns.Bound(p => p.InvoiceNo).Title("Invoice #").Width("5%");
+                             columns.Bound(p => p.InvoiceAmount).Title("Amount").Width("5%").Format("{0:c}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.PaymentDueBy).Title("Payment Due By").Format("{0:d}").Width("5%").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.DaysPending).Title("Days Pending").Width("5%").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.InvoiceStatus).Title("Status").Width("7%");
+                             columns.Bound(p => p.DestinationUser).Width("16%");
+                             columns.Bound(p => p.CompletedDate).Format("{0:g}");
+                         })
+
+                             .AutoBind(false)
+                             .Pageable()
+
+                             .Filterable()
+                             .Sortable()
+                             .DataSource(dataSource =>
+                                dataSource.Ajax()
+                                .PageSize(10)
+                                .Read(read => read.Action("GetReportData", "AdminTools")
+                            .Data("GetFilterReportData"))
+                      ))
+        
+    </div>
+
+
+

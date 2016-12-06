@@ -1,0 +1,15 @@
+﻿@using System.Collections
+@model System.Int32?
+
+
+@(Html.Kendo().DropDownList()
+    .BindTo((IEnumerable)ViewBag.SAPCostCenterNo)
+    .Value(Model.ToString())
+    .SelectedIndex(0)
+    .Name("CostCenter").HtmlAttributes(new { @Style = "font-size:12px;" })
+    .OptionLabel("- please select -")
+)
+
+
+
+

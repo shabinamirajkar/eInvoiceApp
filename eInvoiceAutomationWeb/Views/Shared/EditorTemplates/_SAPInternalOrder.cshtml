@@ -1,0 +1,15 @@
+﻿@using System.Collections
+@model string
+
+
+@(Html.Kendo().DropDownList()
+    .BindTo((IEnumerable)ViewBag.SAPInternalOrder)
+    .Value(Model)
+    .SelectedIndex(0)
+    .Name("InternalOrder").HtmlAttributes(new { @Style = "font-size:12px;" })
+    .OptionLabel("- please select -")
+)
+
+
+
+

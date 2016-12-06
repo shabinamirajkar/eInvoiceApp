@@ -1,0 +1,196 @@
+﻿@model eInvoiceAutomationWeb.ViewModels.ShortPayIndexViewModel
+
+<html>
+<head>
+    <title></title>
+    @Styles.Render("~/Content/kendo/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/kendo")
+
+    <!--This CSS entry was added by the Tel n erik VS Extensions for compatibility reasons-->
+    <link href="@Url.Content("~/Content/kendo.compatibility.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.default.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.web.min.js")"></script>
+    <link href="@Url.Content("~/Content/Custom.css")" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="@Url.Content("~/Scripts/Custom.js")"></script>
+
+    <style type="text/css">
+      
+      .GridClass th {
+        border: 1px solid silver;
+        padding: 5px;
+        	font-size: 11pt !important;
+    }
+
+    .GridClass td  {
+        border: 1px solid silver;
+        padding: 5px;
+        	font-size: 11pt !important;
+    }
+   
+
+    .GridClass table{
+         width:100%;
+        
+    }
+
+    table {
+        border: 1px solid silver;
+        margin: 15px 0px 15px 0px;
+    }
+
+     table td, th {
+        padding: 5px;
+       
+    }
+
+    th {
+        background-color:#e8e8e8;
+        color: black;
+
+    }
+
+    p {
+           margin: 15px 0px 15px 0px;
+    }
+
+    p.TabHeading {
+        font-size: 25px;
+        text-align: center;
+        text-decoration: underline;
+    }
+</style>
+
+</head>
+
+<body>
+      
+        <p>
+            <img src="@Server.MapPath("~") \Content\Images\Misc\vtalogoLong.bmp" style="text-decoration: none; border: 0px; text-align:left" />
+        </p>
+  
+        <table style="width:100%" cellpadding="10">
+            <tr>
+                <td class="thick" style="width: 10%">
+                    Date:
+                </td>
+                <td style="width: 40%">
+                    <label for="lblShortPayDate" class="normal">@(String.Format("{0:dd-MMM-yyyy}", Model.ShortPay.Date))</label>
+                </td>
+                <td class="thick" style="width: 20%">
+                    Contract Administrator:
+                </td>
+                <td>
+                    @if (Model.ShortPay.SentFrom!=null)
+                    { 
+                     <label for="lblCA" class="normal"> @Model.ShortPay.SentFrom</label>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td class="thick" style="width:10%">
+                    Vendor:
+                </td>
+                <td>
+                    <label for="lblVendor" class="normal"> @Model.ShortPay.AddressedTo</label>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="thick" style="width: 10%">
+                    Contract No:
+                </td>
+                <td>
+                    @*<label for="lblContractNo" class="normal"> @Model.RoutingDetails.InvoiceDetails.ContractNo</label>*@
+                    <label class="normal">@Model.RoutingDetails.InvoiceDetails.ContractNo</label>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="thick" style="width: 5%">
+                    Invoice No:
+                </td>
+                <td>
+                    <label for="lblInvoiceNo" class="normal"> @Model.RoutingDetails.InvoiceDetails.InvoiceNo</label>
+                </td>
+                <td class="thick" style="width: 20%">
+                    Approved Payment Amount:
+                </td>
+                <td>
+                    <label for="lblApprovedAmount" class="normal">@(String.Format("{0:C}", Model.ShortPay.ApprovedPaymentAmount)) </label>
+                </td>
+            </tr>
+            </table>
+
+    <p style="margin-top:25px; margin-bottom:25px; line-height: 25px">
+
+        @Html.Raw(Model.ShortPayNotesDefault)
+        @*<label for="lblShortPayDefaultNote" class="normal"> @Model.ShortPayNotesDefault</label>*@
+
+    </p>
+
+  <p style="margin-bottom:0px"> @Html.Label("Contracts Administrator Notes:", new { @class = "thick" })</p>
+
+@if (!String.IsNullOrEmpty(Model.ShortPay.CANotes))
+{
+    <table style="width:100%">
+        <tr>
+            <td height="100" valign="top">
+                <label for="LBLCANotes" class="normal">@Model.ShortPay.CANotes</label>
+            </td>
+        </tr>
+    </table>
+}
+
+<p style="margin-bottom:0px">  @Html.Label("CA Adjustments:", new { @class = "thick" })</p>
+
+@if(Model.InvoiceCAFindingsEmp!=null)
+{ 
+    <div class="GridClass">
+        @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.InvoiceCAFindingsEmp>()
+                        .Name("CAFindingsEmpGridReadOnly")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.EmployeeName).Title("Description");
+                             columns.Bound(p => p.Classification).Title("Item Type");
+                             columns.Bound(p => p.InvoiceRate).Title("Inv Rates/Amt").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ApprovedRate).Title("Approved Rate/Amt").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.RateVariance).Title("Rate Variance").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.InvoiceHours).Title("Invoice Hrs").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ApprovedHours).Title("Approved Hrs").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Total).Title("Total Deduction").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Notes).HtmlAttributes(new { style = "Width:50%" });
+                         })
+                               .EnableCustomBinding(true)
+                               .BindTo((System.Collections.IEnumerable)Model.InvoiceCAFindingsEmp)
+        )
+    </div>
+}
+
+<script type="text/javascript">
+
+   
+    function calcCATotal() {
+        var field = "Total";
+        var grid = $("#CAFindingsEmpGridReadOnly").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var newValue = 0;
+        $.each(dataSource.data(), function (index, model) {
+            newValue += model.get(field);
+        });
+    }
+
+    </script>
+        
+  </body>
+</html>
+
+ 

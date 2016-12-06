@@ -1,0 +1,46 @@
+﻿@using System.Collections
+@model string
+
+<script type="text/javascript">
+
+    function onFilterApprover() {
+        return {
+            approver: $("#ApproverUserId").data("kendoDropDownList").filterInput.val()
+          };
+    }
+</script>
+
+@*@(Html.Kendo().DropDownList()
+    .BindTo((IEnumerable)ViewBag.MemoryApprovers)
+    .DataValueField("Concatenated")
+    .DataTextField("Concatenated")
+    .ValuePrimitive(true)
+    .Name("ApproverUserId").HtmlAttributes(new { @Style = "font-size:12px;" })
+    .OptionLabel("- please select -")
+)*@
+ 
+
+@(Html.Kendo().DropDownList()
+   .Name("ApproverUserId").HtmlAttributes(new { @Style = "font-size:12px; width:100%;" })
+   .AutoBind(false)
+   .DataTextField("Concatenated")
+   .DataValueField("UserID")
+   .Filter("contains")
+   .MinLength(3)
+   .OptionLabel("- please select -")
+   .ValuePrimitive(true)
+   .DataSource(source =>
+     {
+         source.Read(read =>
+          {
+              read.Action("GetSAPExchangeEmployees", "RoutingDetails").Data("onFilterApprover");
+          })
+         .ServerFiltering(true);
+     })
+  
+)
+
+
+
+
+

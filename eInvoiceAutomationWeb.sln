@@ -1,0 +1,68 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eInvoiceAutomationWeb", "eInvoiceAutomationWeb\eInvoiceAutomationWeb.csproj", "{9EBF38A3-CA7B-412B-8C1D-DF9859E66885}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eInvoiceApplication.DomainModel", "eInvoiceApplication.DomainModel\eInvoiceApplication.DomainModel.csproj", "{FD7DB0A5-F153-41E8-A88A-5DF3FFD720B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAPSourceMasterApplication.DomainModel", "SAPSourceMasterApplication.DomainModel\SAPSourceMasterApplication.DomainModel.csproj", "{BFA3EF75-5742-4F10-9673-8B79726C458C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eInvoiceK2SAPBroker", "eInvoiceK2SAPBroker\eInvoiceK2SAPBroker\eInvoiceK2SAPBroker.csproj", "{DB746796-B925-47A0-80D7-A0F0C957D525}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eInvoice.K2Access", "eInvoice.K2Acccess\eInvoice.K2Access.csproj", "{412BC26A-1688-4B44-AA36-7346C4CC1DCB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug_woDrawing|Any CPU = Debug_woDrawing|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		Release_woDrawing|Any CPU = Release_woDrawing|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9EBF38A3-CA7B-412B-8C1D-DF9859E66885}.Debug_woDrawing|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EBF38A3-CA7B-412B-8C1D-DF9859E66885}.Debug_woDrawing|Any CPU.Build.0 = Debug|Any CPU
+		{9EBF38A3-CA7B-412B-8C1D-DF9859E66885}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EBF38A3-CA7B-412B-8C1D-DF9859E66885}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EBF38A3-CA7B-412B-8C1D-DF9859E66885}.Release_woDrawing|Any CPU.ActiveCfg = Release|Any CPU
+		{9EBF38A3-CA7B-412B-8C1D-DF9859E66885}.Release_woDrawing|Any CPU.Build.0 = Release|Any CPU
+		{9EBF38A3-CA7B-412B-8C1D-DF9859E66885}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EBF38A3-CA7B-412B-8C1D-DF9859E66885}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD7DB0A5-F153-41E8-A88A-5DF3FFD720B8}.Debug_woDrawing|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD7DB0A5-F153-41E8-A88A-5DF3FFD720B8}.Debug_woDrawing|Any CPU.Build.0 = Debug|Any CPU
+		{FD7DB0A5-F153-41E8-A88A-5DF3FFD720B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD7DB0A5-F153-41E8-A88A-5DF3FFD720B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD7DB0A5-F153-41E8-A88A-5DF3FFD720B8}.Release_woDrawing|Any CPU.ActiveCfg = Release|Any CPU
+		{FD7DB0A5-F153-41E8-A88A-5DF3FFD720B8}.Release_woDrawing|Any CPU.Build.0 = Release|Any CPU
+		{FD7DB0A5-F153-41E8-A88A-5DF3FFD720B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD7DB0A5-F153-41E8-A88A-5DF3FFD720B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFA3EF75-5742-4F10-9673-8B79726C458C}.Debug_woDrawing|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFA3EF75-5742-4F10-9673-8B79726C458C}.Debug_woDrawing|Any CPU.Build.0 = Debug|Any CPU
+		{BFA3EF75-5742-4F10-9673-8B79726C458C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFA3EF75-5742-4F10-9673-8B79726C458C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFA3EF75-5742-4F10-9673-8B79726C458C}.Release_woDrawing|Any CPU.ActiveCfg = Release|Any CPU
+		{BFA3EF75-5742-4F10-9673-8B79726C458C}.Release_woDrawing|Any CPU.Build.0 = Release|Any CPU
+		{BFA3EF75-5742-4F10-9673-8B79726C458C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFA3EF75-5742-4F10-9673-8B79726C458C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB746796-B925-47A0-80D7-A0F0C957D525}.Debug_woDrawing|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB746796-B925-47A0-80D7-A0F0C957D525}.Debug_woDrawing|Any CPU.Build.0 = Debug|Any CPU
+		{DB746796-B925-47A0-80D7-A0F0C957D525}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB746796-B925-47A0-80D7-A0F0C957D525}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB746796-B925-47A0-80D7-A0F0C957D525}.Release_woDrawing|Any CPU.ActiveCfg = Release|Any CPU
+		{DB746796-B925-47A0-80D7-A0F0C957D525}.Release_woDrawing|Any CPU.Build.0 = Release|Any CPU
+		{DB746796-B925-47A0-80D7-A0F0C957D525}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB746796-B925-47A0-80D7-A0F0C957D525}.Release|Any CPU.Build.0 = Release|Any CPU
+		{412BC26A-1688-4B44-AA36-7346C4CC1DCB}.Debug_woDrawing|Any CPU.ActiveCfg = Debug|Any CPU
+		{412BC26A-1688-4B44-AA36-7346C4CC1DCB}.Debug_woDrawing|Any CPU.Build.0 = Debug|Any CPU
+		{412BC26A-1688-4B44-AA36-7346C4CC1DCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{412BC26A-1688-4B44-AA36-7346C4CC1DCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{412BC26A-1688-4B44-AA36-7346C4CC1DCB}.Release_woDrawing|Any CPU.ActiveCfg = Release|Any CPU
+		{412BC26A-1688-4B44-AA36-7346C4CC1DCB}.Release_woDrawing|Any CPU.Build.0 = Release|Any CPU
+		{412BC26A-1688-4B44-AA36-7346C4CC1DCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{412BC26A-1688-4B44-AA36-7346C4CC1DCB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

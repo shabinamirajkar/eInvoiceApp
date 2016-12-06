@@ -1,0 +1,117 @@
+﻿@using Kendo.Mvc.UI
+
+
+
+<div class="row">
+    <div class="col-sm-12">
+        Error Log Report
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function GetFilterErrorLogData() {
+        return {
+            DateFrom: $("#ErrorLogdatepickerFrom").val(),
+            DateTo: $("#ErrorLogdatepickerTo").val(),
+            Status: 'AP Review',
+            Access: "AP",
+            SubmittedBy: '',
+        };
+    }
+    $("#btnSubmitErrorReport").click(function () {
+        // code which gets excecuted for 'Submit' button click
+        $("#ErrorLogGrid").data("kendoGrid").dataSource.fetch();
+        $("#divErrorLogGrid").show();
+    });
+
+</script>
+
+    <div id="form" class="container-fluid border-box-sizing">
+    <div class="row">
+        <div class="col-sm-12 divClassHeader">
+            <div style=" height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-6">
+                    @Html.Label("Error Log Date Range:", new { style = "vertical-align:bottom; font-weight:bold" })
+                    &nbsp;&nbsp;
+                    @(Html.Kendo().DatePicker()
+                            .Value(DateTime.Now.AddMonths(-6))
+                            .Name("ErrorLogdatepickerFrom")
+                            .HtmlAttributes(new { style = "width:150px" }))
+                    @(Html.Kendo().DatePicker()
+                            .Name("ErrorLogdatepickerTo")
+                             .Value(DateTime.Today)
+                            .HtmlAttributes(new { style = "width:150px" }))
+
+                    <input type="button" value="Search" id="btnSubmitErrorReport" class="btn-primary" style="vertical-align:middle" title="Search" />
+                </div>
+               
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-4">
+
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-2">
+
+
+                </div>
+                <div class="col-sm-2">
+                </div>
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-4">
+
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-4">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        <div id="divErrorLogGrid" style="display:none">
+    @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.InvoiceErrorLog>()
+                        .Name("ErrorLogGrid")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.InvoiceErrorLogID).Encoded(false).Title("Log ID").Width("10%");
+                             columns.Bound(p => p.Date).Title("Date").Width("10%").Format("{0:dd-MMM-yyyy HH:mm:ss}");
+                             columns.Bound(p => p.UserDisplayName).Title("User Name").Width("10%");
+                             columns.Bound(p => p.Message).Title("Message").Width("20%");
+                             columns.Bound(p => p.Exception).Title("Exception Detail").Width("50%");
+                         })
+                             .AutoBind(false)
+                             .Pageable()
+                             .Filterable()
+                             .Sortable()
+                             .DataSource(dataSource =>
+                                dataSource.Ajax()
+                                .PageSize(10)
+                                    .Read(read => read.Action("GetErrorLog", "AdminTools")
+                                    .Data("GetFilterErrorLogData"))
+                      ))
+</div>

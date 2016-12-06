@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<!-- InfoMajesty Inc. 02/26/2015 Layout used by eInvoice Approval Form Screens which need the TabStrip -->
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    
+    @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content/kendo/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Styles.Render("~/Content/ElementStyles")
+
+    <!--This CSS entry was added by the Telerik VS Extensions for compatibility reasons-->
+    <link href="@Url.Content("~/Content/kendo.compatibility.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.default.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+    @*<link rel="stylesheet" href="http://cdn.kendostatic.com/201 4.3.1316/styles/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/2014.3.1316/styles/kendo.bootstrap.min.css">*@
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/jquery.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/jszip.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo.modernizr.custom.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <style>
+        /*.k-widget .border-box-sizing * {
+            box-sizing: border-box;
+        }*/
+
+        
+    .k-widget select, .k-widget textarea, .k-widget input[type="text"]:not(.k-input), .k-widget input[type="password"], .k-widget input[type="datetime"], .k-widget input[type="datetime-local"], .k-widget input[type="date"], .k-widget input[type="month"], .k-widget input[type="time"], .k-widget input[type="week"], .k-widget input[type="number"], .k-widget input[type="email"], .k-widget input[type="url"], .k-widget input[type="search"], .k-widget input[type="tel"], .k-widget input[type="color"], .k-widget .uneditable-input {
+    box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box;
+}
+
+.k-window .row, .k-window .row *:not(.k-widget):not(.k-animation-container), .k-widget .row *:before:not(.k-widget) { box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; }
+
+.k-widget .col-lg-1, .k-widget .col-lg-2, .k-widget .col-lg-3, .k-widget .col-lg-4, .k-widget .col-lg-5, .k-widget .col-lg-6, .k-widget .col-lg-7, .k-widget .col-lg-8, .k-widget .col-lg-9, .k-widget .col-lg-10, .k-widget .col-lg-11, .k-widget .col-lg-12, .k-widget .col-md-1, .k-widget .col-md-2, .k-widget .col-md-3, .k-widget .col-md-4, .k-widget .col-md-5, .k-widget .col-md-6, .k-widget .col-md-7, .k-widget .col-md-8, .k-widget .col-md-9, .k-widget .col-md-10, .k-widget .col-md-11, .k-widget .col-md-12, .k-widget .col-sm-1, .k-widget .col-sm-2, .k-widget .col-sm-3, .k-widget .col-sm-4, .k-widget .col-sm-5, .k-widget .col-sm-6, .k-widget .col-sm-7, .k-widget .col-sm-8, .k-widget .col-sm-9, .k-widget .col-sm-10, .k-widget .col-sm-11, .k-widget .col-sm-12, .k-widget .col-xs-1, .k-widget .col-xs-2, .k-widget .col-xs-3, .k-widget .col-xs-4, .k-widget .col-xs-5, .k-widget .col-xs-6, .k-widget .col-xs-7, .k-widget .col-xs-8, .k-widget .col-xs-9, .k-widget .col-xs-10, .k-widget .col-xs-11, .k-widget .col-xs-12
+{
+    box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box;
+}
+
+    </style>
+</head>
+<body style="background-color:#E2E2E2">
+    <nav class="navbar navbar-inverse " style="border:none; border-color:transparent">
+        <div class="container-fluid">
+            <div>
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a id="headerImage" href="@Url.Action("Home", "Home")">
+                    <img src="~/Content/images/Misc/VTAeInvoice.jpg" style="text-decoration: none; border: 0px; width:100%; text-align:left" />
+                </a>
+
+            </div>
+           
+        </div>
+
+        <div class="row" style="font-weight:bold;background-color:lightgray">
+            <div class="col-sm-6">
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav" style="font-weight:bold;background-color:lightgray">
+                        <li>@Html.ActionLink("eInvoice Dashboard", "Dashboard", "AdminTools")</li>
+
+                        <li>@Html.ActionLink("Accounts Payable", "eInvoice", "Home")</li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">System Tools <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Config Admin", "RolesAdmin", "AdminTools")</li>
+                                <li class="divider"></li>
+                                <li>@Html.ActionLink("Config Escalation", "ConfigEscalation", "AdminTools")</li>
+                                <li class="divider"></li>
+                                <li>@Html.ActionLink("Config Miscellaneous Data", "ConfigMiscData", "AdminTools")</li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help Center<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Home", "Home", "Home")</li>
+                                <li class="divider"></li>
+                                <li>@Html.ActionLink("Help", "Home", "Home")</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+            </div>
+
+            <div class="col-sm-3">
+                @if (Session["LoggedInUserName"] != null)
+                {
+                    <p class="nav navbar-text navbar-right" style="font-weight:bold; font-size: 12px">
+                        Welcome @Session["LoggedInUserName"].ToString()
+                    </p>
+                }
+            </div>
+        </div>
+
+
+
+        </div>
+
+              
+    </nav>
+
+     @RenderBody()
+
+</body>
+
+</html>
+
+<style>
+    .formheader {
+        margin-top: 0px;
+    }
+
+    .headerfont {
+        font-weight: bolder;
+        text-align: center;
+    }
+
+    .kendotabstrip {
+        margin-top: 0px;
+        height: 100px;
+    }
+
+    .marginBottom-0 {
+        margin-bottom: 0;
+    }
+
+    .dropdown-submenu {
+        position: relative;
+    }
+
+        .dropdown-submenu > .dropdown-menu {
+            top: 0;
+            left: 100%;
+            margin-top: -6px;
+            margin-left: -1px;
+            -webkit-border-radius: 0 6px 6px 6px;
+            -moz-border-radius: 0 6px 6px 6px;
+            border-radius: 0 6px 6px 6px;
+        }
+
+        .dropdown-submenu > a:after {
+            display: block;
+            content: " ";
+            float: right;
+            width: 0;
+            height: 0;
+            border-color: transparent;
+            border-style: solid;
+            border-width: 5px 0 5px 5px;
+            border-left-color: #cccccc;
+            margin-top: 5px;
+            margin-right: -10px;
+        }
+
+        .dropdown-submenu:hover > a:after {
+            border-left-color: #555;
+        }
+
+        .dropdown-submenu.pull-left {
+            float: none;
+        }
+
+            .dropdown-submenu.pull-left > .dropdown-menu {
+                left: -100%;
+                margin-left: 10px;
+                -webkit-border-radius: 6px 0 6px 6px;
+                -moz-border-radius: 6px 0 6px 6px;
+                border-radius: 6px 0 6px 6px;
+            }
+</style>
+
+
+<script type="text/javascript">
+
+    (function ($) {
+        var docNo = @Html.Raw(Json.Encode(ViewBag.DocumentNo));
+        var showAllTabs = @Html.Raw(Json.Encode(ViewBag.ShowAllTabs));
+
+        $(document).ready(function () {
+            $('ul.dropdown-menu [data-toggle=dropdown]').on('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                $(this).parent().siblings().removeClass('open');
+                $(this).parent().toggleClass('open');
+            });
+                       
+        });
+    })(jQuery);
+</script>
+
+

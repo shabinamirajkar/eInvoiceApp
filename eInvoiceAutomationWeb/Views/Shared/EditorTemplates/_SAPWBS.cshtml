@@ -1,0 +1,41 @@
+﻿@using System.Collections
+@using Kendo.Mvc.UI
+
+
+<script type="text/javascript">
+
+    function onWBSData() {
+        return {
+            wbsNo: $("#WBSNo").data("kendoDropDownList").filterInput.val()
+          };
+    }
+
+ </script>
+
+@(Html.Kendo().DropDownList()
+        .Name("WBSNo").HtmlAttributes(new { @Style = "font-size:12px;" })
+        .DataTextField("WBSNo") 
+        .DataValueField("WBSNo") 
+        .Filter("contains")
+        .MinLength(3)
+        .OptionLabel("- please select -")
+        .ValuePrimitive(true)
+        .DataSource(source => {
+            source.Read(read =>
+            {
+                read.Action("GetSAPWBS", "PurchaseOrderDetails").Data("onWBSData");
+            })
+            .ServerFiltering(true);
+        })
+      
+  )
+
+
+
+
+
+
+
+
+
+

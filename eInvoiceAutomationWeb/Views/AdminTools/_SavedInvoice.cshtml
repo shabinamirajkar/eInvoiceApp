@@ -1,0 +1,136 @@
+﻿@using Kendo.Mvc.UI
+
+
+<div class="row">
+    <div class="col-sm-12">
+        Saved Invoice
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function GetFilterSavedInvoiceData() {
+        return {
+            DateFrom: $("#datepickerFrom").val(),
+            DateTo: $("#datepickerTo").val(),
+            Status: 'AP Review',
+            Access: "AP",
+            SubmittedBy: '',
+        };
+    }
+    $("#btnSubmit1").click(function () {
+        // code which gets excecuted for 'Submit' button click
+        $("#SavedInvoiceGrid").data("kendoGrid").dataSource.fetch();
+        $("#divSavedInvoiceGrid").show();
+    });
+
+</script>
+
+    <div id="form" class="container-fluid border-box-sizing">
+    <div class="row">
+        <div class="col-sm-12 divClassHeader">
+            <div style=" height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-6">
+                    @Html.Label("Saved Date Range:", new { style = "vertical-align:bottom; font-weight:bold" })
+                    &nbsp;&nbsp;
+                    @(Html.Kendo().DatePicker()
+                            .Value(DateTime.Now.AddMonths(-6))
+                            .Name("datepickerFrom")
+                            .HtmlAttributes(new { style = "width:150px" }))
+                    @(Html.Kendo().DatePicker()
+                            .Name("datepickerTo")
+                             .Value(DateTime.Today)
+                            .HtmlAttributes(new { style = "width:150px" }))
+
+                    <input type="button" value="Search" id="btnSubmit1" class="btn-primary" style="vertical-align:middle" title="Search" />
+                </div>
+               
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-4">
+
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-2">
+
+
+                </div>
+                <div class="col-sm-2">
+                </div>
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-4">
+
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-4">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div id="divSavedInvoiceGrid" style="display:none">
+    @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.DashboardReport>()
+                        .Name("SavedInvoiceGrid")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.InvoiceMasterID).Visible(false);
+                             columns.Bound(p => p.ContractNo).Title("Contract/PO").Width("10%").ClientTemplate("<a href='" + Url.Action("eInvoice", "Home", new { InvoiceMasterID = "#=InvoiceMasterID#" }) + "'>#=ContractNo#</a>");
+                             columns.Bound(p => p.DocumentNo).Title("Document #").Width("10%");
+                             columns.Bound(p => p.VendorName).Title("Vendor Name").Width("23%");
+                             columns.Bound(p => p.InvoiceNo).Title("Invoice No").Width("16%");
+                             columns.Bound(p => p.InvoiceAmount).Title("Amount").Width("7%").Format("{0:c}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.PaymentDueBy).Title("Payment Due By").Format("{0:d}").Width("7%").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.DaysPending).Title("Days Pending").Width("7%").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Command(command => { command.Destroy(); }).Title("Commands");
+                         })
+                    //   .Editable(editable => editable.Mode(GridEditMode.InCell))
+                                    .Sortable()
+                                    .Pageable()
+                                    .Navigatable()
+                                    .AutoBind(true)
+                                // .Events(e => e.Remove(@"function(e){setTimeout(function(){$('#SavedInvoiceGrid').data('kendoGrid').dataSource.sync()})}"))
+                                // .Events(e => e.Remove("onRowDelete"))
+                                    .DataSource(dataSource =>
+                                        dataSource.Ajax()
+                                                .AutoSync(true)
+                                            //  .Events(e => e.Change("onDataSourceChange"))
+                                                .PageSize(10)
+                                                .Batch(true)
+                                                    .Model(model =>
+                                                    {
+                                                        model.Id(p => p.InvoiceMasterID);
+                                                    })
+                                                            .Read(read => read.Action("SavedInvoice_Read", "AdminTools").Data("GetFilterSavedInvoiceData"))
+                                                            .Destroy(update => update.Action("SavedInvoice_Destroy", "AdminTools"))
+                                                 )
+                            )
+
+</div>
+
+
+

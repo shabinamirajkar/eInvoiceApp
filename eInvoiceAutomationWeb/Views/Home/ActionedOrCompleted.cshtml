@@ -1,0 +1,15 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Error";
+ }
+
+<h3 class="text-danger">An error occurred while processing your request. This document number has already been actioned or completed.</h3>
+
+@if (ViewBag.ErrorMessage != null)
+{ 
+    <h3>Error Message: @ViewBag.ErrorMessage</h3>
+}
+
+<h5>Error Log Date time is: @DateTime.Now</h5>
+

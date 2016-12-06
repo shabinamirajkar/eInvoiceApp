@@ -1,0 +1,133 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Select File to Upload</title>
+
+    @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content/kendo/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Styles.Render("~/Content/ElementStyles")
+
+    <!--This CSS entry was added by the Telerik VS Extensions for compatibility reasons-->
+    <link href="@Url.Content("~/Content/kendo.compatibility.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.default.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/jquery.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/jszip.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo.modernizr.custom.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <link href="@Url.Content("~/Content/Custom.css")" rel="stylesheet" type="text/css" />
+
+<script>
+
+    var errorShown = false;
+    var api = {
+        isIE: function () {
+            var myNav = navigator.userAgent.toLowerCase();
+            return (myNav.indexOf('msie') != -1) ? parseInt(myNav.split('msie')[1]) : false;
+        }
+    }
+
+    $(document).ready(function () {
+        $.ajaxSetup({ cache: false });
+
+        $(function () {
+            var upload = $("#files").data("kendoUpload");
+            if (upload != null) {
+                $.extend(upload.options.localization, {
+                    headerStatusUploading: "",
+                    headerStatusUploaded: "",
+                    statusUploaded: "",
+                });
+            }
+        });
+    });
+
+
+    function OnInvoiceUploadSuccess(e) {
+        //kendo.ui.progress($("#files").data("kendoUpload"), false);
+        kendo.ui.progress($('#divAttach'), false);
+       window.parent.refreshAfterUpload();
+    }
+
+    function OnInvoiceUpload(e) {
+        var files = e.files;
+        //kendo.ui.progress($("#files").data("kendoUpload"), true);
+
+        $.each(files, function (index,value) {
+            var ie = api.isIE();
+            var showProgress = true;
+            if((ie && ie > 9) || (ie == false)) {
+                if (this.size > 0) {
+
+                    var match = (new RegExp('[~#%\&{}+\|]|\\.\\.|^\\.|\\.$')).test(value.name);
+                    if (match) {
+                        //alert("Invalid file name. The name of the attached file contains invalid characters.");
+                        alert("Invalid file name. The name of the attached file contains invalid characters. Do not use the following invalid characters ~ \" # % & * : < > ? \/ \\ { | }.");
+                        showProgress = false;
+                        e.preventDefault();
+                    }
+
+                   if(value.extension == ".js" || value.extension == ".vbs" || value.extension == ".map")  {
+                       alert("Cannot attach files with extensions  " + value.extension);
+                       showProgress = false;
+                        e.preventDefault();
+                        //kendo.ui.progress($("#files").data("kendoUpload"), false);
+                    }
+                }
+                else  {
+                    alert("You have to select a file which has data.");
+                    showProgress = false;
+                    e.preventDefault();
+                    //kendo.ui.progress($("#files").data("kendoUpload"), false);
+                }
+            }
+            if (showProgress)
+                kendo.ui.progress($('#divAttach'), true);
+        });
+    }
+
+    function onInvoiceUploadError(e) {
+        //kendo.ui.progress($("#files").data("kendoUpload"), false);
+        var err = e.XMLHttpRequest.responseText;
+        //alert("Some error has occured while uploading the document to SharePoint.");
+    }
+
+  </script>
+
+</head>
+
+<body>
+    <div id="divAttach" class="k-content">
+        <table cellspacing="0" cellpadding="0" style="border:none;">
+            <tr>
+                <td>
+                    &nbsp;&nbsp;@Html.Label("Invoice:", new { @class = "thick" })
+                </td>
+                <td style="width:150px;height:35px">
+                    @(Html.Kendo().Upload()
+                           .Name("files")
+                           .Messages(m => m.Select("Select Invoice File..."))
+                           .ShowFileList(false)
+                           .Multiple(false)
+                           .Events(events => events.Error("onInvoiceUploadError").Success("OnInvoiceUploadSuccess").Upload("OnInvoiceUpload"))
+                           .Async(a => a.Save("SaveInvoiceToSharePoint", "RoutingDetails").AutoUpload(true)))
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

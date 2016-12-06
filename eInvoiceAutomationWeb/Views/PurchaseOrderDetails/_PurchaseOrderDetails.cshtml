@@ -1,0 +1,247 @@
+﻿@*Shared Editable PO Order Details view*@
+@using System.Collections
+@using Kendo.Mvc.UI
+@model eInvoiceAutomationWeb.ViewModels.PurchaseOrderDetailsViewModel
+
+    <div class="container-fluid">
+        @if (Model != null && Model.RoutingDetails != null)
+        {
+             <div class="row" id="invoiceDetailTable">
+            <div class="col-sm-12">
+                @Html.Partial("~/Views/Shared/_InvoiceDetailsReadOnly.cshtml", Model.RoutingDetails)
+            </div>
+         </div>
+        }
+
+       <div class="row">
+            <div class="col-sm-6">
+                @Html.Label("Document No: ", new { @class = "thick" })
+                @if (Model.DocumentNo != null)
+                {
+                    <label id="txtDocumentNo">@Model.DocumentNo.ToString()</label>
+                }
+            </div>
+            <div class="col-sm-6">
+                <p>
+                     <a id="top" href="#bottom" class="btn-hyperlink" title="Click here to make changes for Accounting Cost Codes">CHANGES NEEDED</a>
+                </p>
+            </div>
+       </div>
+
+        @if (Model != null)
+        {
+           <div class="row">
+             <div class="col-sm-12">
+                @Html.Partial("~/Views/PurchaseOrderDetails/_AccountingCostCodesReadOnly.cshtml", Model)
+             </div>
+           </div>
+        }
+
+        <div style="height:10px"></div>
+
+        <div class="row">
+            <div class="col-sm-3">
+                @if (Model.RoutingDetails.InvoiceDetails.SESNumber == null)
+                {
+                    Model.RoutingDetails.InvoiceDetails.SESNumber = string.Empty;
+                }
+                @Html.Label("SES(s) NEEDED:", new { @class = "sesNumber" })
+               
+                <input class="custom-input" type="text" id="SESNumber" value="@Model.RoutingDetails.InvoiceDetails.SESNumber" />
+            </div>
+            <div class="col-sm-9"></div>
+        </div>
+
+        <div style="height:15px"></div>
+                  
+        <div id="bottom" class="divModifyCostCodesGrid" hidden="hidden">
+         
+           <div class="row">
+                <div class="col-sm-4">
+                    @Html.Label("Indicate correct PO Line assignment below:", new { @class = "thick" })
+                    <a href="javascript: openWindow('@Url.Action("DisplayLogHistory", "PurchaseOrderDetails")', 'Change History')">
+                        Change History
+                    </a>
+                </div>
+                <div class="col-sm-8">
+                </div>
+            </div>
+
+           <div style="height:15px"></div>
+
+           <div class="row">
+                <div class="col-sm-12" id="modifyCostCodesGrid">
+                    @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.ModifyAccountingCostCodesViewModel>()
+                      .Name("ModifyAccountingGrid")
+                      .Columns(columns =>
+                      {
+                          columns.Bound(p => p.InvoiceDetailChangesID).Visible(false);
+                          columns.Bound(p => p.InvoiceMasterID).Visible(false);
+                          columns.ForeignKey(p => p.SAPPONumber, (System.Collections.IEnumerable)ViewBag.SAPPONumbers, "PONumber", "FormattedPONumber").Title("PO#").Width(120);
+                          columns.Bound(p => p.SAPPOLine).EditorTemplateName("_SAPPOLine").Title("PO Line").HtmlAttributes(new { style = "text-align:right" });
+                          columns.Bound(p => p.GLAccount).HtmlAttributes(new { style = "text-align:right" });
+                          columns.Bound(p => p.CostCenter).EditorTemplateName("_SAPCostCenter").HtmlAttributes(new { style = "text-align:right" });
+                          columns.Bound(p => p.WBSNo).EditorTemplateName("_SAPWBS").Title("WBS");
+                          columns.Bound(p => p.Fund).EditorTemplateName("_Fund").Width(80).HtmlAttributes(new { style = "text-align:right" });
+                          columns.Bound(p => p.FunctionalArea).Width(100);
+                          columns.Bound(p => p.GrantNumber).Title("Grant").Width(100);
+                          columns.Bound(p => p.InternalOrder).EditorTemplateName("_SAPInternalOrder");
+                          columns.Bound(p => p.InvoiceAmount).Title("Amount").Width(200).EditorTemplateName("_InvoiceAmount").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                             .ClientTemplate("#= kendo.format('{0:c}',InvoiceAmount) #").ClientFooterTemplate("<div>Total: #= kendo.format('{0:c}',window.calcInvoiceAmountTotal()) #</div>");
+                          columns.Bound(p => p.Notes).Width(200);
+                          columns.Bound(p => p.EditedFlag).Title("Edited");
+                          columns.Command(command =>
+                          {
+                              command.Destroy();
+                          }).Title("Commands");
+                       })
+                        .ToolBar(toolbar =>
+                        {
+                            toolbar.Create();
+                        })
+                        .Editable(editable => editable.Mode(GridEditMode.InCell))
+                        .Sortable()
+                        .Pageable()
+                        .Navigatable()
+                        .AutoBind(true)
+                        .DataSource(dataSource =>
+                         dataSource.Ajax()
+                        .ServerOperation(false)
+                        .PageSize(10)
+                        .Batch(true)
+                        .AutoSync(true)
+                        .Model(model =>
+                          {
+                              model.Id(p => p.InvoiceDetailChangesID);
+                              model.Field(p => p.GLAccount).Editable(true);
+                              model.Field(p => p.EditedFlag).Editable(false);
+                              model.Field(p => p.SAPPONumber).DefaultValue(ViewData["defaultPONumber"]);
+                          })
+                        .Create(create => create.Action("ModifyAccountingCostCodes_Create", "PurchaseOrderDetails"))
+                        .Read(read => read.Action("ModifyAccountingCostCodes_Read", "PurchaseOrderDetails"))
+                        .Update(update => update.Action("ModifyAccountingCostCodes_Update", "PurchaseOrderDetails"))
+                        .Destroy(destroy => destroy.Action("ModifyAccountingCostCodes_Destroy", "PurchaseOrderDetails"))
+                    ))
+                </div>
+            </div>
+        
+        </div>
+</div>
+
+
+    <script type="text/javascript">
+
+    $(document).ready(function () {
+        $.ajaxSetup({ cache: false });
+
+        $(".btn-hyperlink").click(function (event) {
+            $('#bottom').show(0);
+            $('html,body').animate({ scrollTop: $(this.hash).offset().top }, 500);
+        });
+    });
+
+
+    function filterSAPPOLines() {
+        var grid = $("#ModifyAccountingGrid").data("kendoGrid");
+        //get the row in edit mode and its item
+        var editRow = grid.tbody.find("tr:has(.k-edit-cell)");
+        var model = grid.dataItem(editRow);
+        return {
+            SAPPONumber: model.SAPPONumber
+        };
+    }
+
+
+    $("#SESNumber").focusout(function () {
+        // var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@(),.-]/);
+        // if ($(this).val() != null && $(this).val() != '' && !(pattern.test($(this).val()))) {
+        if ($(this).val() != null) {
+            $.getJSON('@Url.Action("SaveSESNumber", "PurchaseOrderDetails")', { SESNumber: $(this).val() }, function (data) { });
+        }
+        //else {
+        //    if ($(this).val() != '')
+        //       alert("Please enter valid alpha numeric characters in SES(s) Needed");
+        //}
+    });
+
+
+    function openWindow(url, title) {
+        window.open(url, '_blank');
+    }
+
+
+    function calcInvoiceAmountTotal() {
+        var field = "InvoiceAmount";
+        var modifyAccountingGrid = $("#ModifyAccountingGrid").data("kendoGrid");
+        var modifyAccountingDataSource = modifyAccountingGrid.dataSource;
+        var newValue = 0;
+        $.each(modifyAccountingDataSource.data(), function (index, model) {
+            newValue += model.get(field);
+        });
+        return newValue;
+    }
+
+
+    /* Wire validation */
+    (function ($, kendo) {
+        //  var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@()-,.]/); //unacceptable chars
+
+        $.extend(true, kendo.ui.validator, {
+            rules:
+              {
+                  //FunctionalArea: function (input) {
+                  //    if (input.is("[name='FunctionalArea']") && (pattern.test(input.val()))) {
+                  //        return false;
+                  //    }
+                  //    return true;
+                  //},
+                  FunctionalAreaLength: function (input) {
+                      if (input.is("[name='FunctionalArea']") && (input.val().length > 50)) {
+                          return false;
+                      }
+                      return true;
+                  },
+                  //Grant: function (input) {
+                  //    if (input.is("[name='GrantNumber']") && (pattern.test(input.val()))) {
+                  //        return false;
+                  //    }
+                  //    return true;
+                  //},
+                  GrantLength: function (input) {
+                      if (input.is("[name='GrantNumber']") && (input.val().length > 50)) {
+                          return false;
+                      }
+                      return true;
+                  }
+                  //Notes: function (input) {
+                  //    var reg =new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@()]/);
+                  //    if (input.is("[name='Notes']") && (reg.test(input.val()))) {
+                  //        return false;
+                  //    }
+                  //    return true;
+                  //}
+              },
+            messages:
+            {
+                //FunctionalArea: function (input) {
+                //    return "Please enter valid Functional Area without using any special characters except -,.";
+                //},
+                FunctionalAreaLength: function (input) {
+                    return "Maximum number of characters allowed for Functional Area is 50";
+                },
+                //Grant: function (input) {
+                //    return "Please enter valid Grant without using any special characters except -,.";
+                //},
+                GrantLength: function (input) {
+                    return "Maximum number of characters allowed for Grant is 50";
+                }
+                //Notes: function (input) {
+                //    return "Please enter valid Notes without using any special characters except -,.";
+                //}
+            }
+        });
+    })(jQuery, kendo);
+
+
+</script>
+

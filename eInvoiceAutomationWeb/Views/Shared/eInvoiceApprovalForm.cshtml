@@ -1,0 +1,171 @@
+﻿@{
+    ViewBag.Title = "eInvoiceApprovalForm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div>
+        <div style="float: right; ">
+            @Html.Label("Status:", new { @class = "thick" })
+            @if (TempData["DocumentNo"] == "0")
+                {
+                @Html.Label("AP Review", new { @class = "normal" })
+                }
+            else
+                {
+                @Html.Label((string)@ViewBag.Status, new { @class = "normal" })
+                }
+            &nbsp; &nbsp;
+        </div>
+        <div class="kendotabstrip">
+            @(Html.Kendo().TabStrip().Name("tabstrip")
+                .Animation(true)
+                .Items(tabstrip =>
+                {
+                    tabstrip.Add().Text("Routing Details")
+                        .Selected(true)
+                    @* 06/29/2015 - Post UAT Changes - Build 6 *@
+                    .LoadContentFrom("InvoiceDetails", "RoutingDetails", new { documentNo = TempData["DocumentNo"], status = @ViewBag.Status, SN = @ViewBag.SN, ReadOnly = @TempData["ReadOnly"], ShowPODetails = @ViewBag.ShowPODetails, InvoiceMasterID = @ViewBag.InvoiceMasterID, SharedUser = @ViewBag.SharedUser});
+
+                    tabstrip.Add().Text("Purchase Order Details")
+                    @*  06/29/2015 - Post UAT Changes - Build 6*@
+                    .LoadContentFrom("PODetails", "PurchaseOrderDetails", new { documentNo = TempData["DocumentNo"], status = @ViewBag.Status, SN = @ViewBag.SN, ReadOnly = @TempData["ReadOnly"], defaultInvoiceMasterID = @ViewBag.InvoiceMasterID });
+
+                   
+                    tabstrip.Add().Text("Contract Attest Findings")
+                    @*  06/29/2015 - Post UAT Changes - Build 6*@
+                    .LoadContentFrom("CATTFinding", "CATTFindings", new { documentNo = TempData["DocumentNo"], status = @ViewBag.Status, SN = @ViewBag.SN, ReadOnly = @TempData["ReadOnly"], defaultInvoiceMasterID = @ViewBag.InvoiceMasterID });
+
+                    tabstrip.Add().Text("Short Pay Letter")
+                        @*  06/29/2015 - Post UAT Changes - Build 6*@
+                    .LoadContentFrom("ShortPay", "ShortPay", new { documentNo = TempData["DocumentNo"], status = @ViewBag.Status, SN = @ViewBag.SN, ReadOnly = @TempData["ReadOnly"], defaultInvoiceMasterID = @ViewBag.InvoiceMasterID });
+
+
+                })
+
+)
+        </div>
+
+        
+
+   
+</div>
+
+<style type='text/css'>
+    .formheader {
+        margin-top: 0px;
+    }
+
+    .k-datepicker {
+        vertical-align: middle;
+    }
+
+    .headerfont {
+        font-weight: bolder;
+        text-align: center;
+    }
+
+    .kendotabstrip {
+        margin-top: 0px;
+        height: 100px;
+    }
+
+    .marginBottom-0 {
+        margin-bottom: 0;
+    }
+
+    .dropdown-submenu {
+        position: relative;
+    }
+
+        .dropdown-submenu > .dropdown-menu {
+            top: 0;
+            left: 100%;
+            margin-top: -6px;
+            margin-left: -1px;
+            -webkit-border-radius: 0 6px 6px 6px;
+            -moz-border-radius: 0 6px 6px 6px;
+            border-radius: 0 6px 6px 6px;
+        }
+
+        .dropdown-submenu > a:after {
+            display: block;
+            content: " ";
+            float: right;
+            width: 0;
+            height: 0;
+            border-color: transparent;
+            border-style: solid;
+            border-width: 5px 0 5px 5px;
+            border-left-color: #cccccc;
+            margin-top: 5px;
+            margin-right: -10px;
+        }
+
+        .dropdown-submenu:hover > a:after {
+            border-left-color: #555;
+        }
+
+        .dropdown-submenu.pull-left {
+            float: none;
+        }
+
+            .dropdown-submenu.pull-left > .dropdown-menu {
+                left: -100%;
+                margin-left: 10px;
+                -webkit-border-radius: 6px 0 6px 6px;
+                -moz-border-radius: 6px 0 6px 6px;
+                border-radius: 6px 0 6px 6px;
+            }
+</style>
+
+
+
+
+
+<script type="text/javascript">
+
+    (function ($) {
+        var docNo = @Html.Raw(Json.Encode(TempData["DocumentNo"]));
+        var showAllTabs = @Html.Raw(Json.Encode(ViewBag.ShowAllTabs));
+        var showPODetails = @Html.Raw(Json.Encode(ViewBag.ShowPODetails));
+        var status = @Html.Raw(Json.Encode(ViewBag.Status));
+        var nonContractStatus = @Html.Raw(Json.Encode(TempData["NonContractingInvoice"]));
+
+       $(document).ready(function () {
+
+         $(document).ajaxComplete(
+           function (event, xhr, settings) {
+               if (xhr.status == 401) {
+                  location.href = '@Url.Content("~/Home/SessionTimeOut/")';
+                  }
+              });
+
+            $('ul.dropdown-menu [data-toggle=dropdown]').on('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                $(this).parent().siblings().removeClass('open');
+                $(this).parent().toggleClass('open');
+            });
+
+            var tabStrip = $("#tabstrip").kendoTabStrip().data("kendoTabStrip");
+            if ((docNo == "0" && showAllTabs == false) ) {
+                $(tabStrip.items()[1]).hide();
+                $(tabStrip.items()[2]).hide();
+                $(tabStrip.items()[3]).hide();
+            }
+            else if ((showPODetails == true && status == "AP Review") || (nonContractStatus == true)){
+                $(tabStrip.items()[2]).hide();
+                $(tabStrip.items()[3]).hide();
+            }
+
+            if($("#tabstrip") != null) {
+                var ts = $("#tabstrip").kendoTabStrip().data("kendoTabStrip");
+                ts.tabGroup.on('click', 'li', function (e) {
+                    ts.reload($(this));
+                });
+            }
+
+        });
+    })(jQuery);
+</script>

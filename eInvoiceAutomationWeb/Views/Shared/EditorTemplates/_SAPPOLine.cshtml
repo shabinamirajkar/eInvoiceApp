@@ -1,0 +1,14 @@
+﻿@using System.Collections
+@model  Nullable<System.Int32>
+
+@(Html.Kendo().DropDownListFor(m => m)
+   .Value(Model.ToString())
+   .DataSource(dataSource =>
+      {
+          dataSource.Read(read => read.Action("GetSAPPOLines", "PurchaseOrderDetails").Data("filterSAPPOLines"))
+          .ServerFiltering(true);
+      })
+   .CascadeFrom("SAPPONumber")
+   .Name("SAPPOLine").HtmlAttributes(new { @style = "font-size:12px" })
+   .OptionLabel("- please select -")
+)

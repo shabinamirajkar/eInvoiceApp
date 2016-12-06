@@ -1,0 +1,145 @@
+﻿@*This view is used for Reports *@
+
+@using System.Collections
+@using Kendo.Mvc.UI
+@model eInvoiceAutomationWeb.ViewModels.RoutingDetailsViewModel
+
+<div class="container-fluid border-box-sizing">
+    <div class="row">
+        <div class="col-sm-6">
+            @Html.Label("Document No: ", new { @class = "thick" })
+            <label id="txtDocumentNo">@Model.DocumentNo.ToString()</label>
+            <input type="hidden" value="@Model.SN" id="hdnFlag" />
+            @if (Model.InvoiceDetails!=null)
+              {
+                if(Model.InvoiceDetails.Status!="Rejected")
+                {
+                    <a href="@Url.Action("GeneratePDF","eInvoicePDF", new { DocumentNo=Model.DocumentNo.ToString()})" target="_blank" style="margin-left:10px">
+                        <img src="~/Content/Images/Misc/print-button.png" value="Print" id="btnPrint" height="25" width="25" title="Print Preview" />
+                    </a>
+                }
+            }
+        </div>
+        
+        <div class="col-sm-6">
+            @* 07/01/2015 - Post UAT Changes - Build 8*@
+            @Html.ActionLink("View Invoice Documents", "ViewSharePointInvoices", "RoutingDetails",
+                             new { DocumentNo = @Model.DocumentNo.ToString(),
+                                   VendorNo = @Model.InvoiceDetails.VendorNo.ToString(),
+                                 InvoiceNo = @Model.InvoiceDetails.InvoiceNo.ToString() },
+                             new { target = "_blank" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Partial("~/Views/Shared/_InvoiceDetailsReadOnlyForRoutingDetails.cshtml", Model)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            @if (Model != null)
+            {
+                @Html.Label("Approvers", new { @class = "thick" })
+                @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.ApproversViewModel>()
+                     .Name("ReadOnlyApproversGrid")
+                     .Columns(columns =>
+                     {
+                         columns.Bound(p => p.InvoicePOApproverID).Visible(false);
+                         columns.Bound(p => p.InvoiceMasterID).Visible(false);
+                         columns.Bound(p => p.RoleName);
+                         columns.Bound(p => p.PONumberField).Title("PO");
+                         columns.Bound(p => p.POLine).HtmlAttributes(new { style = "text-align:right" });
+                         columns.ForeignKey(p => p.ApproverUserId, (System.Collections.IEnumerable)ViewBag.MemoryApprovers, "UserID", "Concatenated").Title("Approver");
+                         columns.Bound(p => p.ApproverSuggestedBySAP);
+                     })
+                  .Sortable()
+                  .Pageable()
+                  .Navigatable()
+                  //.Scrollable(s => s.Height("auto"))
+                  .DataSource(dataSource =>
+                   dataSource.Ajax()
+                  .PageSize(10)
+                  .Batch(true)
+                  .ServerOperation(false)
+                  .Model(model =>
+                    {
+                        model.Id(p => p.InvoicePOApproverID);
+                    })
+                  .Read(read => read.Action("Approvers_Read", "RoutingDetails"))
+                )
+              )
+            }
+        </div>
+    </div>
+    <div style="height:15px;"></div>
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("Comments History:", new { @class = "thick" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+           @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.CommentsViewModel>()
+                 .Name("CommentsGridReadOnly")
+                 .Columns(columns =>
+                   {
+                        columns.Bound(p => p.InvoiceCommentID).Visible(false);
+                        columns.Bound(p => p.CommentDate);
+                        columns.Bound(p => p.Comment);
+                        columns.Bound(p => p.CommentBy);
+                   })
+                  .Scrollable(s => s.Height("auto"))
+                  .Pageable()
+                  .Scrollable()
+                  .DataSource(dataSource =>
+                    dataSource.Ajax()
+                  .PageSize(10)
+                  .Model(model =>
+                     {
+                         model.Id(p => p.InvoiceCommentID);
+                     })
+                  .Read(read => read.Action("Comments_Read", "RoutingDetails"))
+              ))
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-2" style="vertical-align:central;width:30px;margin:20px 0px 0px 0px">
+            @Html.Label("Attachments:", new { @class = "thick" })
+        </div>
+    </div>
+
+    <div class="row">
+       <div class="col-sm-12">
+          @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.AttachmentsViewModel>()
+              .Name("AttachmentsGridReadOnly")
+               .Columns(columns =>
+                 {
+                    columns.Bound(p => p.InvoiceAttachmentID).Visible(false);
+                    columns.Bound(p => p.FileName).ClientTemplate("<a href='" + Url.Action("DownloadAttachment", "RoutingDetails", new { attachmentID = "#=InvoiceAttachmentID#" }) + "'>#=FileName#</a>");
+                    columns.Bound(p => p.UploadedUserID);
+                 })
+                 .Sortable()
+                 .Pageable()
+                 .Navigatable()
+                 .Scrollable(s => s.Height("auto"))
+                 .DataSource(dataSource =>
+                   dataSource.Ajax()
+                 .PageSize(10)
+                 .Model(model =>
+                    {
+                        model.Id(p => p.InvoiceAttachmentID);
+                    })
+                 .Read(read => read.Action("Attachments_Read", "RoutingDetails"))
+            ))
+        </div>
+    </div>
+
+</div>
+
+
+
+
+

@@ -1,0 +1,16 @@
+﻿@using System.Collections
+@using Kendo.Mvc.UI
+
+@model string
+
+@(Html.Kendo().DropDownList()
+    .BindTo((IEnumerable)ViewBag.Roles)
+     .DataValueField("RoleAbbreviation")
+    .DataTextField("RoleAbbreviation")
+            .Name("ActivityName").HtmlAttributes(new { @Style = "font-size:12px;" })
+    .Events(e =>
+     {
+         e.Change("onChange");
+     })
+   .OptionLabel("- please select -")
+)

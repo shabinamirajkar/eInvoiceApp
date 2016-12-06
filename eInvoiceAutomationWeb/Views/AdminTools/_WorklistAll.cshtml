@@ -1,0 +1,41 @@
+﻿@using Kendo.Mvc.UI
+
+<div class="row">
+    <div class="col-sm-12">
+        Pending My Action (WorkList)
+    </div>
+</div>
+
+    <div id="clientsDb">
+        @(Html.Kendo().Grid<InfoMajesty.CustomWorklist.CustomWorkList>()
+                        .Name("WorklistAllGrid")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.Text1).Encoded(false).Title("Contract/PO Number").Width("14%").Filterable(false).Sortable(false);
+                             columns.Bound(p => p.Text5).Title("Document #").Width("10%");
+                             columns.Bound(p => p.Text2).Title("Vendor Name").Width("14%");
+                             columns.Bound(p => p.Text3).Title("Invoice #");
+                             columns.Bound(p => p.Text6).Title("Submitted By");
+                             columns.Bound(p => p.Double1).Title("Amount").Width("9%").Format("{0:c}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Date1).Title("Payment Due By").Format("{0:d}").Width("12%").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Number2).Title("Days Pending").Width("12%").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ActivityName);
+                             columns.Bound(p => p.Status).Width("10%");
+                             columns.Bound(p => p.ViewFlowURL).Encoded(false).Title("").Width("7%").Filterable(false).Sortable(false);
+                         })
+
+                             .Pageable()
+
+                             .Filterable()
+                             .Sortable()
+                             .DataSource(dataSource =>
+                                dataSource.Ajax()
+                                .PageSize(10)
+                                .ServerOperation(false)
+                                .Model(model =>
+                                  {
+                                      model.Id(p => p.Text1);
+                                  })
+                                               .Read(read => read.Action("WorklistAll", "AdminTools"))
+                      ))
+    </div>

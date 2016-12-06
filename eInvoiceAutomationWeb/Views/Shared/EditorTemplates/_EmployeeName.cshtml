@@ -1,0 +1,38 @@
+﻿@using System.Collections
+@using Kendo.Mvc.UI
+
+<script type="text/javascript">
+
+    function onAdditionalData() {
+        return {
+            text: $("#EmployeeUserID").data("kendoDropDownList").filterInput.val(),
+        };
+    }
+</script>
+
+@(Html.Kendo().DropDownList()
+        .Name("EmployeeUserID").HtmlAttributes(new { @Style = "font-size:12px;" })
+        .DataValueField("ApproverUserID")
+        .DataTextField("ApproverName")
+        .Filter("contains")
+        .MinLength(1)
+        .Delay(10)
+        .IgnoreCase(true)
+        .OptionLabel("- please select -")
+        .ValuePrimitive(false)
+            .DataSource(source =>
+            {
+                source.Read(read =>
+                {
+                    read.Action("GetADUsers", "CATTFindings").Data("onAdditionalData");
+                })
+                .ServerFiltering(true);
+            })
+                .Events(e =>
+                {
+                    e.Change("onEmployeeNameChange");
+                })
+)
+
+
+

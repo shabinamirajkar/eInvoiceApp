@@ -1,0 +1,665 @@
+﻿@*Shared Editable CATT Details view*@
+@using System.Collections
+@using Kendo.Mvc.UI
+
+@model eInvoiceAutomationWeb.ViewModels.CATTFindingsViewModel
+
+<html>
+<head>
+    <title></title>
+
+    <script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $.ajaxSetup({ cache: false });
+
+        //Allow Max character of 16, for CATT and CA Adjust, defined decimal (18,2) in DB, to prevent Overflow.
+        $("input[data-role='numerictextbox']").attr('maxlength', '16');
+
+        //setting width of Numeric TextBox
+        if ($("#txtCATTTotalAdjustment").data("kendoNumericTextBox") != undefined)
+            $("#txtCATTTotalAdjustment").data("kendoNumericTextBox").wrapper.width(130);
+
+        if ($("#txtCAApprovedAdjustment").data("kendoNumericTextBox") != undefined)
+            $("#txtCAApprovedAdjustment").data("kendoNumericTextBox").wrapper.width(130);
+    });
+
+
+    function calcCARateVarianceTotal() {
+        var field = "RateVariance";
+        var grid = $("#CAFindingsEmpGrid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var newValue = 0;
+        $.each(dataSource.data(), function (index, model) {
+            newValue += model.get(field);
+        });
+        return newValue;
+    }
+
+    function calcCATotal() {
+        var field = "Total";
+        var grid = $("#CAFindingsEmpGrid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var newValue = 0;
+        $.each(dataSource.data(), function (index, model) {
+            newValue += model.get(field);
+        });
+
+        //Label for CA Adjust Amount..
+        $("label[for='LBLCAAdjust']").html('$' + newValue.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
+
+        //Label for for a Payment of CA
+        var Paymentof = @Model.RoutingDetails.InvoiceDetails.InvoiceAmount -newValue;
+        $("label[for='LBLApprovedPaymentof']").html('$' + Paymentof.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
+
+        //Update Value in Hidden TB for DB Save..
+        $("#txtCATotalAdjustment").val(newValue);
+
+        UpdateInvoiceCATTFindings();
+
+        return newValue;
+    }
+
+
+    function calcRateVarianceTotal() {
+        var field = "RateVariance";
+        var grid = $("#CATTFindingsEmpGrid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var newValue = 0;
+        $.each(dataSource.data(), function (index, model) {
+            newValue += model.get(field);
+        });
+        return newValue;
+    }
+
+    function calcTotal() {
+        var field = "Total";
+        var grid = $("#CATTFindingsEmpGrid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var newValue = 0;
+        $.each(dataSource.data(), function (index, model) {
+            newValue += model.get(field);
+        });
+        //Label for CATT Adjust Amount..
+        $("label[for='LBLCATTAdjust']").html('$' + newValue.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
+
+        //Label for for a Payment of CATT
+        var Paymentof = @Model.RoutingDetails.InvoiceDetails.InvoiceAmount -newValue;
+        $("label[for='LBLAssetPaymentof']").html('$' + Paymentof.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
+
+        //Update Value in Hidden TB for DB Save..
+        $("#txtCATTTotalAdjustment").val(newValue);
+        UpdateInvoiceCATTFindings();
+        return newValue;
+    }
+
+    //function onDataSourceChange(e) {
+    //    if (e.action === "sync") {
+    //        alert(e.field);
+    //        if (e.field === "InvoiceRate" || e.field === "ApprovedRate" || e.field === "InvoiceHours") {
+    //            var model = e.items[0];
+    //            model.set("RateVariance", model.InvoiceRate - model.ApprovedRate);
+    //            model.RateVariance = model.InvoiceRate - model.ApprovedRate;
+    //            model.set("Total", model.RateVariance * model.InvoiceHours);
+    //            model.Total = model.RateVariance * model.InvoiceHours;
+    //        }
+    //        //else if (e.field === "InvoiceHours" || e.field === "ApprovedHours") {
+    //        //    var model = e.items[0];
+    //        //    model.set("VarianceHours", model.InvoiceHours - model.ApprovedHours);
+    //        //    model.VarianceHours = model.InvoiceHours - model.ApprovedHours;
+    //        //}
+    //    }
+    //}
+
+    function CalculatePayment(adjustValue) {
+        var invoiceAmt = $("#txtInvoiceAmt").val()
+        return parseFloat(invoiceAmt - adjustValue).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    //function onCATTTotalAdjustmentChange(e) {
+    //    if (this.value() == null || this.value() == '') {
+    //        this.value(0);
+    //    }
+    //    $("label[for='LBLAssetPaymentof']").html('$'+CalculatePayment(this.value()));
+    //    UpdateInvoiceCATTFindings();
+    //}
+
+
+    //function onCAApprovedAdjustmentChange(e) {
+    //    if (this.value() == null || this.value() == '') {
+    //        this.value(0);
+    //    }
+    //    $("label[for='LBLApprovedPaymentof']").html('$'+CalculatePayment(this.value()));
+    //    UpdateInvoiceCATTFindings();
+    //}
+
+
+    //$("#txtCATTTotalAdjustment").focusout(function () {
+    //    if ($(this).val() != null && $(this).val() != '') {
+    //        $("label[for='LBLAssetPaymentof']").html(CalculatePayment($(this).val()));
+    //        UpdateInvoiceCATTFindings();
+    //    }
+    //    else {
+    //        $("#txtCATTTotalAdjustment").data("kendoNumericTextBox").value(0);
+    //        $("label[for='LBLAssetPaymentof']").html(CalculatePayment($(this).val()));
+    //        UpdateInvoiceCATTFindings();
+    //    }
+    //});
+
+    //$("#txtCAApprovedAdjustment").focusout(function () {
+    //    if ($(this).val() != null && $(this).val() != '') {
+    //        $("label[for='LBLApprovedPaymentof']").html(CalculatePayment($(this).val()));
+    //        UpdateInvoiceCATTFindings();
+    //    }
+    //    else {
+    //        $("#txtCAApprovedAdjustment").data("kendoNumericTextBox").value(0);
+    //        $("label[for='LBLAssetPaymentof']").html(CalculatePayment($(this).val()));
+    //        UpdateInvoiceCATTFindings();
+    //    }
+    //});
+
+
+
+    //$("#CATTNotes").focusout(function () {
+    //    if ($(this).val() != null && $(this).val() != '') {
+    //        UpdateInvoiceCATTFindings()
+    //    }
+    //});
+
+    $("#CATTNotes").focusout(function () {
+        //   var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@()]/);
+        //  if (($(this).val() != null && $(this).val() != '' && !(pattern.test($(this).val()))) || ($(this).val() == '')) {
+        UpdateInvoiceCATTFindings()
+        //}
+        //else {
+        //    if ($(this).val() != '')
+        //        alert("Please enter valid characters in CATT Notes without using any special characters except -,.");
+        //}
+    });
+
+
+    $("#CATTCANotes").focusout(function () {
+        //  var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@()]/);
+        // if (($(this).val() != null && $(this).val() != '' && !(pattern.test($(this).val()))) || ($(this).val() == '')) {
+        UpdateInvoiceCATTFindings()
+        //}
+        //else {
+        //    if ($(this).val() != '')
+        //        alert("Please enter valid characters in Contract Administrator Notes without using any special characters except -,.");
+        //}
+    });
+
+    //$("#CANotes").focusout(function () {
+    //    if ($(this).val() != null && $(this).val() != '') {
+    //        UpdateInvoiceCATTFindings()
+    //    }
+    //});
+
+    $("#DatepickerSubmitDate").focusout(function () {
+        if ($(this).val() != null && $(this).val() != '') {
+            UpdateInvoiceCATTFindings()
+        }
+    });
+
+    function onTOCAUserIDChange(e) {
+        if (this.value() != null || this.value() != '') {
+            //   alert(this.value());
+            UpdateInvoiceCATTFindings();
+        }
+
+    }
+
+    function onFROMCATTUserIDChange(e) {
+        if (this.value() != null || this.value() != '') {
+            //  alert(this.value());
+            UpdateInvoiceCATTFindings();
+        }
+    }
+
+
+    function UpdateInvoiceCATTFindings() {
+        var ToCA = $("#TOCAUserID").data("kendoMultiSelect").value();
+        var FromCATT = $("#FROMCATTUserID").data("kendoMultiSelect").value();
+
+        //Set the Value in hidden TextBox
+        $("#txtTOCAUserID").val(ToCA);
+        $("#txtFROMCATTUserID").val(FromCATT);
+
+        //   alert($("#txtCATTTotalAdjustment").val());
+        //   alert($("#txtCATotalAdjustment").val());
+
+        $.getJSON('@Url.Action("UpdateInvoiceCATTFindings", "CATTFindings")',
+                    {
+                        AddressedTo: $("#txtTOCAUserID").val(),
+                        SentFrom: $("#txtFROMCATTUserID").val(),
+                        Date: $("#DatepickerSubmitDate").val(),
+                        CATTRecommendedAdjustment: $("#txtCATTTotalAdjustment").val(),
+                        CARecommendedAdjustment: $("#txtCATotalAdjustment").val(),
+                        CATTNotes: $("#CATTNotes").val(),
+                        CANotes: $("#CATTCANotes").val(),
+                    });
+    }
+
+
+    /* Wire validation */
+    (function ($, kendo) {
+        var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@()]/); //unacceptable chars
+
+        $.extend(true, kendo.ui.validator, {
+            rules:
+              {
+                  //EmployeeUserID: function (input) {
+                  //    if (input.is("[name='EmployeeUserID']") && (pattern.test(input.val()))) {
+                  //        return false;
+                  //    }
+                  //    return true;
+                  //},
+                  EmployeeUserIDLength: function (input) {
+                      if (input.is("[name='EmployeeUserID']") && (input.val().length > 50)) {
+                          return false;
+                      }
+                      return true;
+                  },
+                  //Classification: function (input) {
+                  //    if (input.is("[name='Classification']") && (pattern.test(input.val()))) {
+                  //        return false;
+                  //    }
+                  //    return true;
+                  //},
+                  ClassificationLength: function (input) {
+                      if (input.is("[name='Classification']") && (input.val().length > 50)) {
+                          return false;
+                      }
+                      return true;
+                  },
+                  //Notes: function (input) {
+                  //    if (input.is("[name='Notes']") && (pattern.test(input.val()))) {
+                  //        return false;
+                  //    }
+                  //    return true;
+                  //},
+                  NotesLength: function (input) {
+                      if (input.is("[name='Notes']") && (input.val().length > 1000)) {
+                          return false;
+                      }
+                      return true;
+                  }
+              },
+            messages:
+            {
+                //EmployeeUserID: function (input) {
+                //    return "Please enter a valid Employee Name without using any special characters";
+                //},
+                EmployeeUserIDLength: function (input) {
+                    return "Maximum number of characters allowed for Employee Name is 50";
+                },
+                //Classification: function (input) {
+                //    return "Please enter a valid Classification without using any special characters";
+                //},
+                ClassificationLength: function (input) {
+                    return "Maximum number of characters allowed for Classification is 50";
+                },
+                //Notes: function (input) {
+                //    return "Please enter a valid Notes without using any special characters";
+                //},
+                NotesLength: function (input) {
+                    return "Maximum number of characters allowed for Notes is 1000";
+                }
+            }
+        });
+    })(jQuery, kendo);
+
+    </script>
+
+</head>
+
+<body>
+
+    <div class="container-fluid border-box-sizing">
+        <div class="row">
+            <div class="col-sm-12">
+                @Html.Label("Document No: ", new { @class = "thick" })
+                @if (Model.DocumentNo != null)
+                {
+                    <label id="lblDocumentNo">@Model.DocumentNo.ToString()</label>
+                }
+            </div>
+        </div>
+
+        @if (Model != null && Model.RoutingDetails != null)
+        {
+            <div class="row" id="invoiceDetailTable">
+                <div class="col-sm-12">
+                    @Html.Partial("~/Views/Shared/_InvoiceDetailsReadOnly.cshtml", Model.RoutingDetails)
+                </div>
+            </div>
+        }
+    </div>
+
+    @Html.Label("Recommendations/Results", new { @class = "thick" })
+
+    <div class="container-fluid border-box-sizing" style="width:82%">
+        <div class="row">
+            <div class="col-sm-12 divClassHeader">
+                <div style="height:5px;"></div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        @Html.Label("Attest: Total adjustment of: ", new { @class = "thick" })
+
+                        <label for="LBLCATTAdjust" class="normal">@(String.Format("{0:C}", Model.InvoiceCATTFindings.CATTRecommendedAdjustment.Value))</label>
+                        <input type="text" id="txtCATTTotalAdjustment" hidden="hidden" value=@Model.InvoiceCATTFindings.CATTRecommendedAdjustment.Value>
+
+                    </div>
+                    <div class="col-sm-5">
+                        @Html.Label("for a Payment of: ", new { @class = "thick" })
+                        <input type="text" id="txtInvoiceAmt" hidden="hidden" value=@Model.RoutingDetails.InvoiceDetails.InvoiceAmount>
+                        <label for="LBLAssetPaymentof" class="normal"> @(String.Format("{0:C}", Model.AssetPayment))</label>
+                    </div>
+                </div>
+                <div style="height:5px;"></div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <span style="margin-right:18px"> @Html.Label("Approved adjustment of: ", new { @class = "thick" })</span>
+                                                
+                        <label for="LBLCAAdjust" class="normal">@(String.Format("{0:C}", Model.InvoiceCATTFindings.CARecommendedAdjustment.Value))</label>
+                        <input type="text" id="txtCATotalAdjustment" hidden="hidden" value=@Model.InvoiceCATTFindings.CARecommendedAdjustment.Value>
+                        
+                    </div>
+                    <div class="col-sm-5">
+                        @Html.Label("for a Payment of: ", new { @class = "thick" })
+                        <label for="LBLApprovedPaymentof" class="normal">@(String.Format("{0:C}", Model.ApprovedPayment))</label>
+                    </div>
+                </div>
+                <div style="height:5px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid border-box-sizing" style="width:82%">
+        <div class="row">
+            <div class="col-sm-12 divClassHeader">
+                <div style="height:5px;"></div>
+                <div class="row">
+                    <div class="col-sm-1">
+                        <label title="Maximum of four people allowed" class="thick">To:</label>
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="text" id="txtTOCAUserID" hidden="hidden">
+                        @(Html.Kendo().MultiSelect()
+                 .Name("TOCAUserID").HtmlAttributes(new { @Style = "font-size:12px;" })
+                .DataValueField("ApproverUserID")
+                .DataTextField("ApproverName")
+                .Filter("contains")
+                .MinLength(1)
+                .Delay(0)
+                .MaxSelectedItems(4)
+                .IgnoreCase(true)
+                .Value(Model.ToCA)
+                .Events(e => e.Change("onTOCAUserIDChange"))
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                         {
+                             read.Action("FetchApprovers", "CATTFindings");//.Data("onCATTAdditionalData");
+                         });
+                    })
+                        )
+
+                    </div>
+                    <div class="col-sm-1">
+                        @Html.Label("Date:", new { @class = "thick" })
+                    </div>
+                    <div class="col-sm-3">
+                        @(Html.Kendo().DatePicker()
+                            .Value(Model.DateSubmit)
+                            .Name("DatepickerSubmitDate")
+                            .HtmlAttributes(new { style = "width:150px" }))
+                    </div>
+                </div>
+                <div style="height:5px;"></div>
+                <div class="row">
+                    <div class="col-sm-1">
+                        <label title="Maximum of four people allowed" class="thick">From:</label>
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="text" id="txtFROMCATTUserID" hidden="hidden">
+
+                        @(Html.Kendo().MultiSelect()
+                           .Name("FROMCATTUserID").HtmlAttributes(new { @Style = "font-size:12px;" })
+                           .DataValueField("ApproverUserID")
+                           .DataTextField("ApproverName")
+                           .Filter("contains")
+                           .MinLength(1)
+                           .Delay(0)
+                           .MaxSelectedItems(4)
+                           .IgnoreCase(true)
+                           .Value(Model.FromCATT)
+                           .Events(e => e.Change("onFROMCATTUserIDChange"))
+                           .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("FetchApprovers", "CATTFindings");//.Data("onCATTAdditionalData");
+                                });
+                            })
+                        )
+                    </div>
+                    <div class="col-sm-1">
+
+                    </div>
+                    <div class="col-sm-3">
+
+                    </div>
+                </div>
+                <div style="height:5px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+            <div class="col-sm-12">
+                @Html.Label("Contract Attest Notes:", new { @class = "thick" })
+            </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12" style="height:5px;"></div>
+    </div>
+    
+
+    <div class="row">
+            <div class="col-sm-12">
+                @if (Model.LoggedinUserType == "CATT")
+                {
+                    <textarea id="CATTNotes" style="width: 700px; height:100px" class="custom-input" maxlength="1000">@Model.InvoiceCATTFindings.CATTNotes</textarea>
+                }
+                else
+                {
+                    <label for="LBLCATTNotes" class="normal">@Model.InvoiceCATTFindings.CATTNotes</label>
+                    <textarea id="CATTNotes" hidden="hidden" maxlength="1000">@Model.InvoiceCATTFindings.CATTNotes</textarea>
+                }
+            </div>
+         </div>
+
+    <div class="row">
+        <div class="col-sm-12" style="height:15px;"></div>
+    </div>
+
+    @Html.Label("CATT Adjustments:", new { @class = "thick" })
+    <div class="row">
+        <div class="col-sm-12" style="height:5px;"></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-11">
+            @if (Model.LoggedinUserType == "CATT")
+            {
+                @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.InvoiceCATTFindingsEmp>()
+                        .Name("CATTFindingsEmpGrid")
+                        .Columns(columns =>
+                         { 
+                             columns.Bound(p => p.InvoiceCATTFindingsEmpID).Visible(false);
+                             columns.Bound(p => p.InvoiceCATTFindingsID).Visible(false);
+                             columns.Bound(p => p.EmployeeName).Title("Description").Width("12%")
+                                  .ClientFooterTemplate("<div>Total:</div>");
+                             columns.Bound(p => p.Classification).Title("Item Type").Width("10%");
+                             columns.Bound(p => p.InvoiceRate).Title("Inv Rates/Amt").Width("5%").EditorTemplateName("_InvoiceRate").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                                  .ClientTemplate("#= kendo.format('{0:c}',InvoiceRate) #");                                 
+                             columns.Bound(p => p.ApprovedRate).Title("Approved Rate/Amt").Width("5%").EditorTemplateName("_ApprovedRate").HtmlAttributes(new { style = "text-align:right" })
+                                 .ClientTemplate("#= kendo.format('{0:c}',ApprovedRate) #");
+                             columns.Bound(p => p.RateVariance).Title("Rate Variance").Width("5%").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                             .ClientTemplate("#= kendo.format('{0:c}',RateVariance) #")
+                             .ClientFooterTemplate("<div>#= kendo.format('{0:c}',window.calcRateVarianceTotal()) #</div>");
+                             columns.Bound(p => p.InvoiceHours).Title("Invoice Hrs").Width("5%").EditorTemplateName("_InvoiceHours").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ApprovedHours).Title("Approved Hrs").Width("5%").EditorTemplateName("_ApprovedHours").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Total).Title("Total Deduction").Width("7%").EditorTemplateName("_Total").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                                   .ClientTemplate("#= kendo.format('{0:c}',Total) #")
+                                   .ClientFooterTemplate("<div>#= kendo.format('{0:c}',window.calcTotal()) #</div>");
+                          
+                             columns.Bound(p => p.Notes).Width("24%");
+                             columns.Command(command => { command.Destroy(); });
+                         })
+                            .ToolBar(toolbar => toolbar.Create())
+                          //.ToolBar(toolbar => toolbar.Save())
+                            .Editable(editable => editable.Mode(GridEditMode.InCell))
+                            .Sortable()
+                          //.Events(e => e.Edit("onCATTFindingsEmpGridEdit"))
+                            .Pageable()
+                            .Navigatable()
+                            .AutoBind(true)
+                            .DataSource(dataSource =>
+                                         dataSource.Ajax()
+                                        .ServerOperation(false)
+                                        .AutoSync(true)
+                                    //  .Events(e => e.Change("onDataSourceChange"))
+                                        .PageSize(10)
+                                        .Batch(true)
+                                        .Model(model =>
+                                            {
+                                                model.Id(p => p.InvoiceCATTFindingsEmpID);
+                                                model.Field(p => p.RateVariance).Editable(false);
+                                                model.Field(p => p.VarianceHours).Editable(false);
+                                            })
+                                .Create(create => create.Action("CATTFindingsEmp_Create", "CATTFindings"))
+                                .Read(read => read.Action("CATTFindingsEmp_Read", "CATTFindings"))
+                                .Update(update => update.Action("CATTFindingsEmp_Update", "CATTFindings"))
+                                .Destroy(destroy => destroy.Action("CATTFindingsEmp_Destroy", "CATTFindings"))
+                                )
+                )
+            }
+            else
+            {
+                @Html.Partial("~/Views/CATTFindings/_CATTFindingsEmpGridReadOnly.cshtml", Model)
+            }
+        </div>
+        <div class="col-sm-1">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12" style="height:15px;"></div>
+    </div>
+
+    <div class="row">
+                <div class="col-sm-12">
+                    @Html.Label("Contracts Administrator Notes:", new { @class = "thick" })
+                </div>
+     </div>
+
+    <div class="row">
+        <div class="col-sm-12" style="height:5px;"></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            @if (Model.LoggedinUserType == "CA")
+            {
+                <textarea id="CATTCANotes" style="width: 700px; height:100px" class="custom-input" maxlength="1000">@Model.InvoiceCATTFindings.CANotes</textarea>
+            }
+            else
+            {
+                <label for="LBLCANotes" style="border:thin solid lightgray" class="normal">@Model.InvoiceCATTFindings.CANotes</label>
+                <textarea id="CANotes" hidden="hidden" maxlength="1000">@Model.InvoiceCATTFindings.CANotes</textarea>
+            }
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12" style="height:15px;"></div>
+    </div>
+
+    @Html.Label("CA Adjustments:", new { @class = "thick" })
+    <div class="row">
+        <div class="col-sm-12" style="height:5px;"></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-11">
+            @if (Model.LoggedinUserType == "CA")
+            {
+                @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.InvoiceCAFindingsEmp>()
+                        .Name("CAFindingsEmpGrid")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.InvoiceCAFindingsEmpID).Visible(false);
+                             columns.Bound(p => p.InvoiceCATTFindingsID).Visible(false);
+                             columns.Bound(p => p.EmployeeName).Title("Description").Width("12%")
+                                  .ClientFooterTemplate("<div>Total:</div>");
+                             columns.Bound(p => p.Classification).Title("Item Type").Width("10%");
+                             columns.Bound(p => p.InvoiceRate).Title("Inv Rates/Amt").Width("5%").EditorTemplateName("_InvoiceRate").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                                  .ClientTemplate("#= kendo.format('{0:c}',InvoiceRate) #");
+                             columns.Bound(p => p.ApprovedRate).Title("Approved Rate/Amt").Width("5%").EditorTemplateName("_ApprovedRate").HtmlAttributes(new { style = "text-align:right" })
+                                 .ClientTemplate("#= kendo.format('{0:c}',ApprovedRate) #");
+                             columns.Bound(p => p.RateVariance).Title("Rate Variance").Width("5%").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                             .ClientTemplate("#= kendo.format('{0:c}',RateVariance) #")
+                             .ClientFooterTemplate("<div>#= kendo.format('{0:c}',window.calcCARateVarianceTotal()) #</div>");
+                             columns.Bound(p => p.InvoiceHours).Title("Invoice Hrs").Width("5%").EditorTemplateName("_InvoiceHours").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ApprovedHours).Title("Approved Hrs").Width("5%").EditorTemplateName("_ApprovedHours").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Total).Title("Total Deduction").Width("7%").EditorTemplateName("_Total").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                                   .ClientTemplate("#= kendo.format('{0:c}',Total) #")
+                                  .ClientFooterTemplate("<div>#= kendo.format('{0:c}',window.calcCATotal()) #</div>");
+                            
+                             columns.Bound(p => p.Notes).Width("24%");
+                             columns.Command(command => { command.Destroy(); });
+                         })
+                            .ToolBar(toolbar => toolbar.Create())
+                    //.ToolBar(toolbar => toolbar.Save())
+                            .Editable(editable => editable.Mode(GridEditMode.InCell))
+                            .Sortable()
+                    //.Events(e => e.Edit("onCATTFindingsEmpGridEdit"))
+                            .Pageable()
+                            .Navigatable()
+                            .AutoBind(true)
+                            .DataSource(dataSource =>
+                                         dataSource.Ajax()
+                                         .ServerOperation(false)
+                                        .AutoSync(true)
+                                             //  .Events(e => e.Change("onDataSourceChange"))
+                                        .PageSize(10)
+                                        .Batch(true)
+                                        .Model(model =>
+                                            {
+
+                                                model.Id(p => p.InvoiceCAFindingsEmpID);
+                                                model.Field(p => p.RateVariance).Editable(false);
+                                                model.Field(p => p.VarianceHours).Editable(false);
+                                            })
+                                .Create(create => create.Action("CAFindingsEmp_Create", "CATTFindings"))
+                                .Read(read => read.Action("CAFindingsEmp_Read", "CATTFindings"))
+                                .Update(update => update.Action("CAFindingsEmp_Update", "CATTFindings"))
+                                .Destroy(destroy => destroy.Action("CAFindingsEmp_Destroy", "CATTFindings"))
+                             )
+                )
+            }
+            else
+            {
+                @Html.Partial("~/Views/CATTFindings/_CAFindingsEmpGridReadOnly.cshtml", Model)
+            }
+        </div>
+    </div>
+
+
+
+
+
+</body>
+</html>

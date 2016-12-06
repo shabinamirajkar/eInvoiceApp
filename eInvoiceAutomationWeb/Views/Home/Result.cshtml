@@ -1,0 +1,24 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+<body>
+    <div>
+        @if(ViewBag.Result == "Success")
+        { 
+         <p>Your eInvoice request has been submitted successfully!</p>
+        }
+        else
+        {
+           <p>You have rejected to submit the eInvoice request!</p>
+        }
+    </div>
+</body>
+</html>

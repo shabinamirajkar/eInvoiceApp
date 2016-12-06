@@ -1,0 +1,101 @@
+﻿@model eInvoiceAutomationWeb.ViewModels.RoutingDetailsViewModel
+
+<div class="container-fluid border-box-sizing">
+   @if (Model != null)
+   {
+     <div style="height:20px;"></div>
+      <div class="row">
+          <div class="col-sm-12">
+               @Html.Label("Invoice Details:", new { @class = "thick" })
+               @if(Model.ShowPOWarning != null && Model.ShowPOWarning == true)
+               { 
+                   <font id="warning" size="3" title="Note: PO Validity End Date had ended" color="orange">*</font>
+               }
+          </div>
+       </div>
+      
+       if (Model.InvoiceDetails != null)
+       {
+            <div class="row">
+                <div class="col-sm-12 divClassHeader">
+                    <div style="height:5px;"></div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            @Html.Label("Vendor:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-4">
+                            @Html.Label(@Model.InvoiceDetails.VendorName.TrimStart('0'), new { @class = "normal" })
+                        </div>
+                        <div class="col-sm-2">
+                            @Html.Label("Vendor #:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-4">
+                            @Html.Label(@Model.InvoiceDetails.VendorNo.TrimStart('0'), new { @class = "normal" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            @Html.Label("Description/Period:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-2">
+                            @if (Model.InvoiceDetails.Period == null)
+                            {
+                                Model.InvoiceDetails.Period = string.Empty;
+                            }
+                            <label class="normal" style="width:500px">@Model.InvoiceDetails.Period</label>
+                        </div>
+                        <div class="col-sm-2">
+                        </div>
+                        <div class="col-sm-2">
+                            @Html.Label("Contract #:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-4">
+                            @if (Model.InvoiceDetails.ContractNo == null)
+                            {
+                                Model.InvoiceDetails.ContractNo = string.Empty;
+                            }
+                            <label class="normal">@Model.InvoiceDetails.ContractNo</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            @Html.Label("Project:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-2">
+                            @if (Model.InvoiceDetails.Project == null)
+                            {
+                                Model.InvoiceDetails.Project = string.Empty;
+                            }
+                            <label class="normal" style="width:500px">@Model.InvoiceDetails.Project</label>
+                        </div>
+                        <div class="col-sm-2">
+                        </div>
+                        <div class="col-sm-2">
+                            @Html.Label("Invoice #:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-4">
+                           <label class="normal">@Model.InvoiceDetails.InvoiceNo</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            @Html.Label("Payment Due By:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-2">
+                            @Html.Label(@Model.InvoiceDetails.PaymentDueBy.ToShortDateString(), new { @class = "normal" })
+                        </div>
+                        <div class="col-sm-2">
+                        </div>
+                        <div class="col-sm-2">
+                            @Html.Label("Invoice Amount:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="LBLInvoiceAmount" class="normal">@(String.Format("{0:C}", Model.InvoiceDetails.InvoiceAmount))</label>
+                        </div>
+                    </div>
+                </div>
+           </div>
+       }
+   }
+</div>
+

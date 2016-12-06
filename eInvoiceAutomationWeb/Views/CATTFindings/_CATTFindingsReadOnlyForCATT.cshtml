@@ -1,0 +1,297 @@
+﻿
+@*Shared Editable PO Order Details view*@
+@using System.Collections
+@using Kendo.Mvc.UI
+
+@model eInvoiceAutomationWeb.ViewModels.CATTFindingsViewModel
+
+
+<script type="text/javascript">
+
+    function calcRateVarianceTotal() {
+        var field = "RateVariance";
+        var grid = $("#CATTFindingsEmpGrid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var newValue = 0;
+        $.each(dataSource.data(), function (index, model) {
+            newValue += model.get(field);
+        });
+        return newValue;
+    }
+
+    function calcVarianceHoursTotal() {
+        var field = "VarianceHours";
+        var grid = $("#CATTFindingsEmpGrid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var newValue = 0;
+        $.each(dataSource.data(), function (index, model) {
+            newValue += model.get(field);
+        });
+        return newValue;
+    }
+
+    $("#CATTNotes").focusout(function () {
+
+        UpdateInvoiceCATTFindings()
+
+    });
+
+    function onTOCAUserIDChange(e) {
+        if (this.value() != null || this.value() != '') {
+            //   alert(this.value());
+            UpdateInvoiceCATTFindings();
+        }
+
+    }
+
+    function onFROMCATTUserIDChange(e) {
+        if (this.value() != null || this.value() != '') {
+            //  alert(this.value());
+            UpdateInvoiceCATTFindings();
+        }
+    }
+
+    $("#DatepickerSubmitDate").focusout(function () {
+        if ($(this).val() != null && $(this).val() != '') {
+            UpdateInvoiceCATTFindings()
+        }
+    });
+
+    function UpdateInvoiceCATTFindings() {
+        var ToCA = $("#TOCAUserID").data("kendoMultiSelect").value();
+        var FromCATT = $("#FROMCATTUserID").data("kendoMultiSelect").value();
+
+        //Set the Value in hidden TextBox
+        $("#txtTOCAUserID").val(ToCA);
+        $("#txtFROMCATTUserID").val(FromCATT);
+
+
+        //alert($("#txtCATotalAdjustment").val());
+
+        $.getJSON('@Url.Action("UpdateInvoiceCATTFindings", "CATTFindings")',
+                    {
+                        AddressedTo: $("#txtTOCAUserID").val(),
+                        SentFrom: $("#txtFROMCATTUserID").val(),
+                        Date: $("#DatepickerSubmitDate").val(),
+                        CATTRecommendedAdjustment: $("#txtCATTTotalAdjustment").val(),
+                        CARecommendedAdjustment: $("#txtCATotalAdjustment").val(),
+                        CATTNotes: $("#CATTNotes").val(),
+                        CANotes: $("#CANotes").val(),
+                    });
+    }
+
+</script>
+
+
+
+<div class="container-fluid border-box-sizing">
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("Document No: ", new { @class = "thick" })
+            @if (Model.DocumentNo != null)
+            {
+                <label id="lblDocumentNo">@Model.DocumentNo.ToString()</label>
+            }
+        </div>
+    </div>
+
+    @if (Model != null && Model.RoutingDetails != null)
+    {
+        <div class="row" id="invoiceDetailTable">
+            <div class="col-sm-12">
+                @Html.Partial("~/Views/Shared/_InvoiceDetailsReadOnly.cshtml", Model.RoutingDetails)
+            </div>
+        </div>
+    }
+</div>
+
+@Html.Label("Recommendations/Results", new { @class = "thick" })
+
+<div class="container-fluid border-box-sizing" style="width:73%">
+    <div class="row">
+        <div class="col-sm-12 divClassHeader">
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-4">
+                    @Html.Label("Attest: Total adjustment of: ", new { @class = "thick" })
+
+                    @if (Model.InvoiceCATTFindings.CATTRecommendedAdjustment.HasValue)
+                    {
+                        <label for="LBLCATTAdjust" class="normal">@(String.Format("{0:C}", Model.InvoiceCATTFindings.CATTRecommendedAdjustment.Value))</label>
+                        <input type="text" id="txtCATTTotalAdjustment" hidden="hidden" value=@Model.InvoiceCATTFindings.CATTRecommendedAdjustment.Value>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    @Html.Label("for a Payment of: ", new { @class = "thick" })
+                    <label for="LBLAssetPaymentof" class="normal"> @(String.Format("{0:C}", Model.AssetPayment))</label>
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-4">
+                    <span style="margin-right:14px">  @Html.Label("Approved adjustment of: ", new { @class = "thick" }) </span>
+                    @if (Model.InvoiceCATTFindings.CARecommendedAdjustment.HasValue)
+                    {
+                        <label for="LBLCAAdjust" class="normal">@(String.Format("{0:C}", Model.InvoiceCATTFindings.CARecommendedAdjustment.Value))</label>
+                        <input type="text" id="txtCATotalAdjustment" hidden="hidden" value=@Model.InvoiceCATTFindings.CARecommendedAdjustment.Value>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    @Html.Label("for a Payment of: ", new { @class = "thick" })
+                    <label for="LBLApprovedPaymentof" class="normal">@(String.Format("{0:C}", Model.ApprovedPayment))</label>
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid border-box-sizing" style="width:82%">
+    <div class="row">
+        <div class="col-sm-12 divClassHeader">
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-1">
+                    <label title="Maximum of four people allowed" class="thick">To:</label>
+                </div>
+                <div class="col-sm-3">
+                    <input type="text" id="txtTOCAUserID" hidden="hidden">
+                    @(Html.Kendo().MultiSelect()
+                 .Name("TOCAUserID").HtmlAttributes(new { @Style = "font-size:12px;" })
+                .DataValueField("ApproverUserID")
+                .DataTextField("ApproverName")
+                .Filter("contains")
+                .MinLength(1)
+                .Delay(0)
+                .MaxSelectedItems(4)
+                .IgnoreCase(true)
+                .Value(Model.ToCA)
+                .Events(e => e.Change("onTOCAUserIDChange"))
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                         {
+                             read.Action("FetchApprovers", "CATTFindings");//.Data("onCATTAdditionalData");
+                         });
+                    })
+                    )
+
+                </div>
+                <div class="col-sm-1">
+                    @Html.Label("Date:", new { @class = "thick" })
+                </div>
+                <div class="col-sm-3">
+                    @(Html.Kendo().DatePicker()
+                            .Value(Model.DateSubmit)
+                            .Name("DatepickerSubmitDate")
+                            .HtmlAttributes(new { style = "width:150px" }))
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-1">
+                    <label title="Maximum of four people allowed" class="thick">From:</label>
+                </div>
+                <div class="col-sm-3">
+                    <input type="text" id="txtFROMCATTUserID" hidden="hidden">
+
+                    @(Html.Kendo().MultiSelect()
+                           .Name("FROMCATTUserID").HtmlAttributes(new { @Style = "font-size:12px;" })
+                           .DataValueField("ApproverUserID")
+                           .DataTextField("ApproverName")
+                           .Filter("contains")
+                           .MinLength(1)
+                           .Delay(0)
+                           .MaxSelectedItems(4)
+                           .IgnoreCase(true)
+                           .Value(Model.FromCATT)
+                           .Events(e => e.Change("onFROMCATTUserIDChange"))
+                           .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("FetchApprovers", "CATTFindings");//.Data("onCATTAdditionalData");
+                                });
+                            })
+                    )
+                </div>
+                <div class="col-sm-1">
+
+                </div>
+                <div class="col-sm-3">
+
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-sm-12">
+        @Html.Label("Contract Attest Notes:", new { @class = "thick" })
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12" style="height:5px;"></div>
+</div>
+
+
+<div class="row">
+    <div class="col-sm-12">
+        @if (Model.LoggedinUserType == "CATT")
+        {
+            <textarea id="CATTNotes" style="width: 700px; height:100px" class="custom-input" maxlength="1000">@Model.InvoiceCATTFindings.CATTNotes</textarea>
+        }
+        else
+        {
+            <label for="LBLCATTNotes" class="normal">@Model.InvoiceCATTFindings.CATTNotes</label>
+            <textarea id="CATTNotes" hidden="hidden" maxlength="1000">@Model.InvoiceCATTFindings.CATTNotes</textarea>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12" style="height:15px;"></div>
+</div>
+
+
+@Html.Label("CATT Adjustments:", new { @class = "thick" })
+
+<div class="row">
+    <div class="col-sm-11">
+        @Html.Partial("~/Views/CATTFindings/_CATTFindingsEmpGridReadOnly.cshtml", Model)
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12" style="height:15px;"></div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        @Html.Label("Contracts Administrator Notes:", new { @class = "thick" })
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <label for="LBLCANotes" class="normal">@Model.InvoiceCATTFindings.CANotes</label>
+        <textarea id="CANotes" hidden="hidden" maxlength="1000">@Model.InvoiceCATTFindings.CANotes</textarea>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12" style="height:15px;"></div>
+</div>
+
+@Html.Label("CA Adjustments:", new { @class = "thick" })
+
+<div class="row">
+    <div class="col-sm-11">
+        @Html.Partial("~/Views/CATTFindings/_CAFindingsEmpGridReadOnly.cshtml", Model)
+    </div>
+</div>
+

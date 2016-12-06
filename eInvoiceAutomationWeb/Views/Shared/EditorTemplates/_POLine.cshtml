@@ -1,0 +1,17 @@
+﻿@using System.Collections
+@model  Nullable<System.Int32>
+
+
+@(Html.Kendo().DropDownListFor(m => m)
+   .Value(Model.ToString())
+   .DataSource(dataSource =>
+     {
+           dataSource.Read(read => read.Action("GetPOLines", "RoutingDetails").Data("filterPOLines"))
+          .ServerFiltering(true);
+     })
+  .CascadeFrom("PONumber")
+  .Name("POLine").HtmlAttributes(new { @style = "font-size:12px" })
+  .OptionLabel("- please select -")
+  
+)
+

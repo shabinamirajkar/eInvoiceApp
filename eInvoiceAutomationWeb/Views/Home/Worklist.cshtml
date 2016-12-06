@@ -1,0 +1,49 @@
+﻿@{
+    ViewBag.Title = "Worklist";
+    Layout = "~/Views/Shared/_WorklistLayout.cshtml";
+}
+
+<h2>Worklist</h2>
+
+
+
+<title>@ViewBag.Title</title>
+
+<h2 class="demoHeaders">IBR Testing JQuery UI Tabs</h2>
+
+<div id="TabsSet1">
+    <ul>
+        <li><a href="#tabs-test">Test</a></li>
+        <li><a href="/home/About">About</a></li>
+        <li><a href="/Home/Contact">Contacts</a></li>
+    </ul>
+    <div id="tabs-test">
+        <h1>Welcome to this test tab</h1>
+    </div>
+</div>
+
+<br /><br />
+
+<div id="TabsSet2">
+    <ul>
+        <li><a href="/Home/About">About Us</a></li>
+        <li><a href="/Home/Contact">Contacts</a></li>
+        <li><a href="/Product/Index">Our Products</a></li>
+        <li><a href="#tabs-5">Tab X</a></li>
+        <li><a href="#tabs-6">Tab Y</a></li>
+    </ul>
+    <div id="tabs-5">
+        <h1>This is another Main tab</h1>
+    </div>
+    <div id="tabs-6">
+        <h1>Some Tab 2</h1>
+    </div>
+</div>
+
+<script>
+ $(function () {
+ $("#TabsSet1").tabs();
+ $("#TabsSet2").tabs().addClass("ui-tabs-vertical ui-helper-clearfix");
+ $("#TabsSet2 li").removeClass("ui-corner-top").addClass("ui-corner-left");
+ });
+</script>

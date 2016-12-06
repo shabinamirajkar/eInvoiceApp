@@ -1,0 +1,63 @@
+﻿@using System.Collections
+@using Kendo.Mvc.UI
+@model eInvoiceAutomationWeb.ViewModels.PurchaseOrderDetailsViewModel
+
+<div id="form" class="container-fluid border-box-sizing">
+    <div id="accountingCostCodesGrid">
+      @if (Model != null)
+        {
+           <div class="row">
+              <div class="col-sm-5">
+                  @Html.Label("Account Assignment from SAP (Read Only):", new { @class = "thick" })
+               </div>
+               <div class="col-sm-7">
+                  @if (Model.ShowModifyFlag != null && Model.ShowModifyFlag == true)
+                  {
+                      <font id="changes" color="red">There are changes to the Account Assignments</font>
+                  }
+               </div>
+           </div>
+           <div class="row">
+               <div class="col-sm-12">
+                  @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.AccountingCostCodesViewModel>()
+                   .Name("AccountingCostCodesGrid")
+                   .Columns(columns =>
+                     {
+                         columns.Bound(p => p.InvoiceDetailID).Visible(false);
+                         columns.Bound(p => p.InvoiceMasterID).Visible(false);
+                         columns.Bound(p => p.PONumber).Title("PO#");
+                         columns.Bound(p => p.POLine).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.GLAccount).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.CostCenter).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.WBS);
+                         columns.Bound(p => p.Fund).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.FunctionalArea);
+                         columns.Bound(p => p.GrantNumber).Title("Grant");
+                         columns.Bound(p => p.InternalOrder);
+                         columns.Bound(p => p.InvoiceAmount).Title("Amount").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                            .ClientTemplate("#= kendo.format('{0:c}',InvoiceAmount) #")
+                            .ClientFooterTemplate("<div>Total: #= kendo.format('{0:c}',sum) #</div>");
+                     })
+                 .Sortable()
+                 .Pageable()
+                 .Navigatable()
+                 .DataSource(dataSource =>
+                  dataSource.Ajax()
+                 .Aggregates(aggregates =>
+                  {
+                     aggregates.Add(p => p.InvoiceAmount).Sum();
+                  })
+                 .PageSize(10)
+                 .Batch(true)
+                 .ServerOperation(false)
+                 .Model(model =>
+                   {
+                       model.Id(p => p.InvoiceDetailID);
+                   })
+                 .Read(read => read.Action("AccountingCostCodes_Read", "PurchaseOrderDetails"))
+            ))
+           </div>
+           </div>
+        }
+    </div>
+ </div>

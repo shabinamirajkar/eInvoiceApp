@@ -1,0 +1,181 @@
+﻿
+@model eInvoiceAutomationWeb.ViewModels.ShortPayIndexViewModel
+
+<html>
+<head>
+    <title></title>
+   
+</head>
+
+<body>
+    <div class="container-fluid border-box-sizing">
+        <div class="row" style="width:100%">
+            <div class="col-sm-6">
+                @Html.Label("Document No: ", new { @class = "thick" })
+                @if (Model.DocumentNo != null)
+                {
+                    <label id="txtDocumentNo">@Model.DocumentNo.ToString()</label>
+                }
+            </div>
+            <div class="col-sm-6"></div>
+        </div>
+
+        @if (Model != null && Model.RoutingDetails != null)
+        {
+            <div class="row" id="invoiceDetailTable">
+                <div class="col-sm-12">
+                    @Html.Partial("~/Views/Shared/_InvoiceDetailsReadOnly.cshtml", Model.RoutingDetails)
+                </div>
+            </div>
+        }
+    </div>
+
+    <div style="height:10px;"></div>
+
+    <div class="container-fluid border-box-sizing">
+        <div class="row">
+            <div class="col-sm-12 divClassHeader">
+                <div style="height:5px;"></div>
+
+                <div class="row">
+                    <div class="col-sm-2">
+                        <label class="thick">To:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        @if (Model.ShortPay.AddressedTo == null)
+                        {
+                            Model.ShortPay.AddressedTo = string.Empty;
+                        }
+                        <label class="normal">@Model.ShortPay.AddressedTo</label>
+                    </div>
+                    <div class="col-sm-2">
+                        @Html.Label("Date:", new { @class = "thick" })
+                    </div>
+                    <div class="col-sm-4">
+                        @Html.Label(@Model.ShortPay.Date.Value.ToString("MM/dd/yyyy"), new { @class = "normal" })
+                    </div>
+                </div>
+
+                <div style="height:10px;"></div>
+
+                <div class="row">
+                    <div class="col-sm-2">
+                        <label class="thick">From:</label>
+                    </div>
+                    <div class="col-sm-4">
+                        @Html.Label(@Model.FromCA, new { @class = "normal" })
+                    </div>
+                    <div class="col-sm-2">
+                        @Html.Label("CA Phone No:", new { @class = "thick" })
+                    </div>
+                    <div class="col-sm-4">
+                        @if (Model.ShortPay.CAContactNo == null)
+                        {
+                            Model.ShortPay.CAContactNo = string.Empty;
+                        }
+                        @Html.Label(@Model.ShortPay.CAContactNo, new { @class = "normal" })
+                    </div>
+                </div>
+
+                <div style="height:10px;"></div>
+
+                <div class="row">
+                    @if (Model.ShortPay.Subject == null)
+                    {
+                        Model.ShortPay.Subject = string.Empty;
+                    }
+                    <div class="col-sm-2">
+                        @Html.Label("Subject:", new { @class = "thick" })
+                    </div>
+                    <div class="col-sm-4">
+                        @Html.Label(@Model.ShortPay.Subject, new { @class = "normal" })
+                    </div>
+                    <div class="col-sm-2">
+                        @Html.Label("Approved Payment Amount:", new { @class = "thick" })
+                    </div>
+                    <div class="col-sm-4">
+                        <label for="LBLApprovedPaymentAmtof" class="normal">@(String.Format("{0:C}", Model.ShortPay.ApprovedPaymentAmount))</label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div style="height:10px;"></div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("Contracts Administrator Notes:", new { @class = "thick" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            @if (Model.ShortPay.CANotes == null)
+            {
+                Model.ShortPay.CANotes = string.Empty;
+            }
+           @Html.Label(@Model.ShortPay.CANotes, new { @class = "normal" })
+        </div>
+    </div>
+
+    <div style="height:10px;"></div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("CA Adjustments:", new { @class = "thick" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.InvoiceCAFindingsEmp>()
+                        .Name("CAFindingsEmpGridReadOnly")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.InvoiceCAFindingsEmpID).Visible(false);
+                             columns.Bound(p => p.InvoiceCATTFindingsID).Visible(false);
+                             columns.Bound(p => p.EmployeeName).Title("Description").Width("12%")
+                                  .ClientFooterTemplate("<div>Total:</div>");
+                             columns.Bound(p => p.Classification).Title("Item Type").Width("10%");
+                             columns.Bound(p => p.InvoiceRate).Title("Inv Rates/Amt").Width("5%").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                                  .ClientTemplate("#= kendo.format('{0:c}',InvoiceRate) #");
+                             columns.Bound(p => p.ApprovedRate).Title("Approved Rate/Amt").Width("5%").HtmlAttributes(new { style = "text-align:right" })
+                                 .ClientTemplate("#= kendo.format('{0:c}',ApprovedRate) #");
+                             columns.Bound(p => p.RateVariance).Title("Rate Variance").Width("5%").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                             .ClientTemplate("#= kendo.format('{0:c}',RateVariance) #")
+                             .ClientFooterTemplate("<div>#= kendo.format('{0:c}',sum) #</div>");
+                             columns.Bound(p => p.InvoiceHours).Title("Invoice Hrs").Width("5%").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ApprovedHours).Title("Approved Hrs").Width("5%").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Total).Title("Total Deduction").Width("7%").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                                   .ClientTemplate("#= kendo.format('{0:c}',Total) #")
+                                   .ClientFooterTemplate("<div>#= kendo.format('{0:c}',sum) #</div>");
+                             columns.Bound(p => p.Notes).Width("24%");
+                         })
+                            .Sortable()
+                            .Pageable()
+                            .Navigatable()
+                            .AutoBind(true)
+                            .DataSource(dataSource =>
+                                  dataSource.Ajax()
+                                  .Aggregates(aggregates =>
+                                     {
+                                         aggregates.Add(p => p.RateVariance).Sum();
+                                         aggregates.Add(p => p.Total).Sum();
+                                     })
+                                   .PageSize(10)
+                                   .Model(model =>
+                                     {
+                                         model.Id(p => p.InvoiceCAFindingsEmpID);
+                                     })
+                                   .Read(read => read.Action("CAFindingsEmp_Read", "ShortPay")))
+            )
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>

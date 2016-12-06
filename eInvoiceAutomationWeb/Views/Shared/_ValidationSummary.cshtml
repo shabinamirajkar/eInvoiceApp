@@ -1,0 +1,26 @@
+﻿@using eInvoiceApplication.DomainModel;
+@model List<TempErrorMessage>
+
+@{
+    ViewBag.Title = "Validation Summary";
+ }
+
+<div class="CSSTableGenerator" >
+<table class="errormsgtable" style="width:100%;border-color:lightgray">
+    <tr>
+        <td>Tab Name</td>
+        <td>Error Message</td>
+    </tr>
+  
+       @foreach (var item in Model)
+       {
+         <tr>
+            <td>@item.TabName</td>
+            <td>@item.ErrorMsg</td>
+         </tr>
+       }
+   
+</table>
+</div>
+
+

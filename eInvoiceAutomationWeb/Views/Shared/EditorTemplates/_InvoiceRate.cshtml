@@ -1,0 +1,18 @@
+﻿@using System.Collections
+@using Kendo.Mvc.UI
+
+@(Html.Kendo().NumericTextBox<decimal>()
+     .Name("InvoiceRate")
+     .Min(0)
+     .Format("c")
+     .Max(9999)
+     .Decimals(2)
+     .HtmlAttributes(new { style = "text-align:right" })
+)
+
+<script type="text/javascript">
+        $(document).ready(function () {
+            //Allow Max character of 7
+            $("input[data-role='numerictextbox']").attr('maxlength', '7');
+        });
+</script>

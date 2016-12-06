@@ -1,0 +1,22 @@
+﻿@using System.Collections
+@using Kendo.Mvc.UI
+
+@(Html.Kendo().NumericTextBox<int>()
+    .Name("Fund")
+    .Min(0)
+    //.Max(9999)
+    .Decimals(0)
+    .HtmlAttributes(new { style = "text-align:right" })
+)
+
+
+
+<script type="text/javascript">
+        $(document).ready(function () {
+            //Allow Max character of 4
+            $("input[data-role='numerictextbox']").attr('maxlength', '4');
+        });
+</script>
+
+
+

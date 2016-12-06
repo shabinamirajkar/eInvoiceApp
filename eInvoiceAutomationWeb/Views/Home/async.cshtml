@@ -1,0 +1,65 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>async</title>
+
+    @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content/kendo/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Styles.Render("~/Content/ElementStyles")
+
+    <!--This CSS entry was added by the Telerik VS Extensions for compatibility reasons-->
+    <link href="@Url.Content("~/Content/kendo.compatibility.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.default.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/jquery.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/jszip.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo.modernizr.custom.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <link href="@Url.Content("~/Content/Custom.css")" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body>
+   
+    <div class="box">
+        <h4>Information</h4>
+        <p>
+            The Upload is able to upload files out-of-band using the
+            HTML5 File API with fallback for legacy browsers.
+        </p>
+        <p>
+            You need to configure save action that will receive
+            the uploaded files.
+            An optional remove action is also available.
+        </p>
+    </div>
+
+    <div class="demo-section k-content">
+        @(Html.Kendo().Upload()
+        .Name("files")
+        .Async(a => a
+            .Save("Save", "Upload")
+            .Remove("Remove", "Upload")
+            .AutoUpload(true)
+        )
+        )
+    </div>
+
+</body>
+</html>

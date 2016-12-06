@@ -1,0 +1,66 @@
+﻿
+@{
+    ViewBag.Title = "ConfigEscalation";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<p><h4>Config Escalation</h4></p>
+
+@(Html.Kendo().Grid<eInvoiceApplication.DomainModel.ConfigEscalation>()
+    .Name("ConfigEscalationGrid")
+    .Columns(columns =>
+    {
+        columns.Bound(p => p.ConfigEscalationsID).Visible(false);
+        columns.Bound(p => p.ActivityName).Width(50).EditorTemplateName("_ActivityName").Title("Activity Name").ClientTemplate("#: ActivityName #");
+        columns.Bound(p => p.FirstReminderDays).Width(50).Title("Reminder (in Hrs)");
+        columns.Command(command => { command.Destroy(); }).Width(172);
+    })
+    .ToolBar(toolbar => toolbar.Create())
+    .ToolBar(toolbar => toolbar.Save())
+    .AutoBind(true)
+    .Editable(editable => editable.Mode(GridEditMode.InCell))
+    .Pageable()
+    .Pageable()
+    .Navigatable()
+    .Scrollable(s => s.Height("auto"))
+    .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(20)
+            .Batch(true)
+            .ServerOperation(false)
+               .Events(events => events.Sync("onSyncEnd"))
+            .Model(model => model.Id(p => p.ConfigEscalationsID))
+            .Create(update => update.Action("ConfigEscalation_Create", "AdminTools"))
+            .Read(read => read.Action("ConfigEscalation_Read", "AdminTools"))
+            .Update(update => update.Action("ConfigEscalation_Update", "AdminTools"))
+            .Destroy(update => update.Action("ConfigEscalation_Destroy", "AdminTools"))
+    )
+)
+
+
+<script type="text/javascript">
+
+    function onChange(e) {
+        var selectedValue = $(e.sender.text());
+        var grid = $("#ConfigEscalationGrid").data("kendoGrid");
+        var editRow = grid.tbody.find("tr:has(.k-edit-cell)");
+        var currentDataItem = grid.dataItem(editRow);
+        currentDataItem.set("ActivityName", selectedValue.selector.toString());
+    }
+
+    function onSyncEnd(e) {
+        //  alert(e.type);
+        // if ((e.type == "create" || e.type == "update") && !e.response.Errors) {
+        alert("Record(s) saved successfully");
+        $("#ConfigAdmin").data("kendoGrid").dataSource.read();
+        // }
+        //if (e.type == "destroy" && !e.response.Errors) {
+        //    alert("Record(s) saved successfully");
+        //    $("#ConfigAdmin").data("kendoGrid").dataSource.read();
+        //}
+
+    }
+
+
+</script>
+

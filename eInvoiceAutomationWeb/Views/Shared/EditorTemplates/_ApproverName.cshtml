@@ -1,0 +1,64 @@
+﻿@using System.Collections
+@using Kendo.Mvc.UI
+
+<script type="text/javascript">
+
+    function onAdditionalData() {
+        return {
+            text: $("#ApproverUserID").data("kendoDropDownList").filterInput.val(),
+        };
+    }
+</script>
+
+@(Html.Kendo().DropDownList()
+        .Name("ApproverUserID").HtmlAttributes(new { @Style = "font-size:12px;" })
+        .DataValueField("ApproverUserID")
+        .DataTextField("ApproverName")
+        .Filter("contains")
+        .MinLength(1)
+        .Delay(10)
+        .IgnoreCase(true)
+        .OptionLabel("- please select -")
+        .ValuePrimitive(false)
+        .DataSource(source => {
+            source.Read(read =>
+            {
+                read.Action("FetchApprovers", "AdminTools").Data("onAdditionalData"); ;
+            })
+            .ServerFiltering(true);
+        })
+        .Events(e =>
+        {
+            e.Change("onApproverNameChange");
+        })
+)
+
+@*@(Html.Kendo().MultiSelect()
+    .Placeholder("Select Employees..")
+    .MaxSelectedItems(1)
+    .AutoClose(true)
+    .Filter(FilterType.Contains)
+        .DataValueField("WBSNo")
+        .DataTextField("Description")
+        .DataSource(source =>
+        {
+            source.Read(read =>
+            {
+                read.Action("GetWBS", "AdminTools");
+            })
+            .ServerFiltering(true);
+        })
+    //.BindTo((IEnumerable)ViewBag.MemoryApprovers)
+    //        .DataValueField("WBSNo")
+    //        .DataTextField("Description")
+            
+        .Name("ApproverUserID").HtmlAttributes(new { @Style = "font-size:12px;" })
+    .Events(e =>
+     {
+         e.Change("onApproverNameChange");
+     })
+  // .OptionLabel("- please select -")
+)*@
+
+
+

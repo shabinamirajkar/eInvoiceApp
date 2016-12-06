@@ -1,0 +1,544 @@
+﻿@*Shared Editable PO Order Details view*@
+@using System.Collections
+@using Kendo.Mvc.UI
+
+@model eInvoiceAutomationWeb.ViewModels.PDFDocumentViewModel
+
+
+@Styles.Render("~/Content/kendo/css")
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/kendo")
+
+<!--This CSS entry was added by the Telerik VS Extensions for compatibility reasons-->
+<link href="@Url.Content("~/Content/kendo.compatibility.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.default.min.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+<script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.all.min.js")"></script>
+<script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.aspnetmvc.min.js")"></script>
+<script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.web.min.js")"></script>
+<link href="@Url.Content("~/Content/Custom.css")" rel="stylesheet" type="text/css" />
+
+<style type="text/css">
+
+
+      .GridClass th {
+        border: 1px solid silver;
+        padding: 5px;
+        	font-size: 11pt !important;
+    }
+
+    .GridClass td  {
+        border: 1px solid silver;
+        padding: 5px;
+        	font-size: 11pt !important;
+    }
+   
+
+    .GridClass table{
+         width:100%;
+        
+    }
+
+    table {
+        border: 1px solid silver;
+        margin: 15px 0px 15px 0px;
+    }
+
+     table td, th {
+        padding: 5px;
+       
+    }
+
+    th {
+        background-color:e8e8e8;
+        color: black;
+
+    }
+
+    p {
+           margin: 15px 0px 15px 0px;
+    }
+
+    p.TabHeading {
+        font-size: 25px;
+        text-align: center;
+        text-decoration: underline;
+    }
+</style>
+
+<p>
+    <img src="@Server.MapPath("~") \Content\Images\Misc\VTAeInvoice.jpg" style="text-decoration: none; border: 0px; text-align:left" />
+</p>
+
+
+<p>@Html.Label("Document No: ", new { @class = "thick" })
+@if (Model.CATTFindingsViewModel.DocumentNo != null)
+{
+    <label id="lblDocumentNo">@Model.CATTFindingsViewModel.DocumentNo.ToString()</label>
+}
+</p>
+<p>@Html.Label("Invoice Details:", new { @class = "thick" })</p>
+
+@*-------------Common Header----------------------------*@
+
+<table style="width:100%">
+
+    @if (Model != null && Model.CATTFindingsViewModel.RoutingDetails != null && Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails != null)
+    {
+    <tr>
+        <td>
+            @Html.Label("Vendor:", new { @class = "thick" })
+        </td>
+        <td>
+            @Html.Label(@Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.VendorName, new { @class = "normal" })
+        </td>
+        <td>
+            @Html.Label("Vendor #:", new { @class = "thick" })
+        </td>
+        <td>
+            @Html.Label(@Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.VendorNo.TrimStart('0'), new { @class = "normal" })
+        </td>
+    </tr>
+    <tr>
+        <td>
+            @Html.Label("Description/Period:", new { @class = "thick" })
+        </td>
+        <td>
+            @if (Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.Period == null)
+            {
+                Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.Period = string.Empty;
+            }
+            <label class="normal" style="width:500px">@Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.Period</label>
+        </td>
+
+        <td>
+            @Html.Label("Contract #:", new { @class = "thick" })
+        </td>
+        <td>
+            @if (Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.ContractNo == null)
+            {
+                Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.ContractNo = string.Empty;
+            }
+            <label class="normal">@Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.ContractNo</label>
+        </td>
+
+    </tr>
+    <tr>
+        <td>
+            @Html.Label("Project:", new { @class = "thick" })
+        </td>
+        <td>
+            @if (Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.Project == null)
+            {
+                Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.Project = string.Empty;
+            }
+            <label class="normal" style="width:500px">@Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.Project</label>
+        </td>
+
+        <td>
+            @Html.Label("Invoice #:", new { @class = "thick" })
+        </td>
+        <td>
+            <label class="normal">@Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.InvoiceNo</label>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            @Html.Label("Payment Due By:", new { @class = "thick" })
+        </td>
+        <td>
+            @Html.Label(@Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.PaymentDueBy.ToShortDateString(), new { @class = "normal" })
+        </td>
+        <td>
+            @Html.Label("Invoice Amount:", new { @class = "thick" })
+        </td>
+        <td>
+            <label for="LBLInvoiceAmount" class="normal">@(String.Format("{0:C}", Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.InvoiceAmount))</label>
+        </td>
+    </tr>
+    }
+</table>
+
+<p class="TabHeading">eInvoice Cover Page</p> 
+
+@if (Model.eInvoiceApprovers!=null)
+{ 
+    <div class="GridClass">
+
+        @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.eInvoiceApprovers>()
+                         .Name("ReadOnlyApproversGrid")
+                         .Columns(columns =>
+                         {
+                             columns.Bound(p => p.Role).Title("Role Name");
+                             columns.Bound(p => p.ApproverUserID).Title("UserID");
+                             columns.Bound(p => p.ApproverFullName).Title("UserName");
+                             columns.Bound(p => p.DateTime);
+                         })
+                        .EnableCustomBinding(true)
+                        .BindTo((IEnumerable)Model.eInvoiceApprovers)
+        )
+    </div>
+}
+<div style="page-break-before:always">&nbsp;</div>
+
+<p class="TabHeading">Routing Details</p>
+
+<p style="margin-bottom:0px">  @Html.Label("Approvers:", new { @class = "thick" })</p>
+
+<div class="GridClass">
+
+    @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.ApproversViewModel>()
+                     .Name("ReadOnlyApproversGrid")
+                     .Columns(columns =>
+                     {
+                         columns.Bound(p => p.RoleName);
+                         columns.Bound(p => p.FormattedPONumber).Title("PO#");
+                         columns.Bound(p => p.POLine);
+                         columns.Bound(p => p.Approver);
+                         columns.Bound(p => p.ApproverSuggestedBySAP);
+                     })
+                    .EnableCustomBinding(true)
+                    .BindTo((IEnumerable)Model.ApproversViewModel)
+             )
+</div>
+
+<p style="margin-bottom:0px">  @Html.Label("Comments History:", new { @class = "thick" })</p>
+
+<div class="GridClass">
+@(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.CommentsViewModel>()
+                 .Name("CommentsGridReadOnly")
+                 .Columns(columns =>
+                   {
+                       columns.Bound(p => p.CommentDate);
+                       columns.Bound(p => p.Comment);
+                       columns.Bound(p => p.CommentBy);
+                   })
+                    .EnableCustomBinding(true)
+                    .BindTo((IEnumerable)Model.CommentsViewModel)
+            )
+</div>
+
+<p style="margin-bottom:0px">  @Html.Label("Attachments:", new { @class = "thick" })</p>
+
+<div class="GridClass">
+    @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.AttachmentsViewModel>()
+              .Name("AttachmentsGridReadOnly")
+               .Columns(columns =>
+                 {
+                     columns.Bound(p => p.FileName).ClientTemplate("<a href='" + Url.Action("DownloadAttachment", "RoutingDetails", new { attachmentID = "#=InvoiceAttachmentID#" }) + "'>#=FileName#</a>");
+                     columns.Bound(p => p.UploadedUserID);
+                 })
+                .EnableCustomBinding(true)
+                .BindTo((IEnumerable)Model.AttachmentsViewModel)
+   )
+
+</div>
+
+@if ((Model.AccountingCostCodesViewModel != null) && (Model.AccountingCostCodesViewModel.Count > 0))
+    {
+<div style="page-break-before:always">&nbsp;</div>
+<p class="TabHeading">Purchase Order Details</p> 
+
+<p style="margin-bottom:0px">  @Html.Label("Account Assignment from SAP (Read Only):", new { @class = "thick" })</p>
+
+   
+<div class="GridClass">
+
+@(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.AccountingCostCodesViewModel>()
+                .Name("AccountingCostCodesGrid")
+                .Columns(columns =>
+                   {
+                        columns.Bound(p => p.FormattedPONumber).Title("PO#");
+                        columns.Bound(p => p.POLine).HtmlAttributes(new { style = "text-align:right" });
+                        columns.Bound(p => p.GLAccount).HtmlAttributes(new { style = "text-align:right" });
+                        columns.Bound(p => p.CostCenter).HtmlAttributes(new { style = "text-align:right" });
+                        columns.Bound(p => p.WBS);
+                        columns.Bound(p => p.Fund).HtmlAttributes(new { style = "text-align:right" });
+                        columns.Bound(p => p.FunctionalArea);
+                        columns.Bound(p => p.FormattedGrantNumber).Title("Grant");
+                        columns.Bound(p => p.InternalOrder);
+                        columns.Bound(p => p.InvoiceAmount).Title("Amount").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                  })
+                .EnableCustomBinding(true)
+                .BindTo((IEnumerable)Model.AccountingCostCodesViewModel)
+            )
+
+</div>
+
+<p style="margin-bottom:0px">  @Html.Label("SES(s) Needed:", new { @class = "thick" })</p>
+
+if (!String.IsNullOrEmpty(Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.SESNumber))
+{
+    <table style="width:30%">
+        <tr>
+            <td height="45" valign="top">
+                <label for="LBLSESNeeded" class="normal">@Model.CATTFindingsViewModel.RoutingDetails.InvoiceDetails.SESNumber</label>
+            </td>
+        </tr>
+    </table>
+}
+
+<p style="margin-bottom:0px">  @Html.Label("Indicate correct PO Line assignment below:", new { @class = "thick" })</p>
+if (Model.ModifyAccountingCostCodesViewModel!=null)
+{ 
+<div class="GridClass">
+    @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.ModifyAccountingCostCodesViewModel>()
+                     .Name("ModifyAccountingReadOnlyGrid")
+                     .Columns(columns =>
+                     {
+                         columns.Bound(p => p.FormattedPONumber).Title("PO#");
+                         columns.Bound(p => p.SAPPOLine).Title("PO Line").HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.GLAccount).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.CostCenter).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.WBSNo).Title("WBS");
+                         columns.Bound(p => p.Fund).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.FunctionalArea);
+                         columns.Bound(p => p.FormattedGrantNumber).Title("Grant");
+                         columns.Bound(p => p.InternalOrder);
+                         columns.Bound(p => p.InvoiceAmount).Title("Amount").Format("{0:C}").Width(200).HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.Notes).HtmlAttributes(new { style = "Width:30%" });;
+                     })
+                        .EnableCustomBinding(true)
+                        .BindTo((IEnumerable)Model.ModifyAccountingCostCodesViewModel)
+    )
+
+</div>
+}
+        }
+        
+@if ((Model.ShortPayIndexViewModel.ShortPay != null) && !String.IsNullOrEmpty((@Model.ShortPayIndexViewModel.ShortPay.SentFrom)))
+{
+<div style="page-break-before:always">&nbsp;</div>
+<p class="TabHeading">Short Pay Letter</p>
+
+
+     <table style="width:100%">
+            <tr>
+                <td><label class="thick">To:</label></td>
+                <td>
+                    @if (Model.ShortPayIndexViewModel.ShortPay.AddressedTo == null)
+                    {
+                        Model.ShortPayIndexViewModel.ShortPay.AddressedTo = string.Empty;
+                    }
+                    <label class="normal">@Model.ShortPayIndexViewModel.ShortPay.AddressedTo</label>
+                </td>
+
+
+                <td> <label class="thick">Date:</label></td>
+                <td>
+                    @if (Model.ShortPayIndexViewModel.ShortPay.Date.HasValue)
+                    {
+                        @Html.Label(@Model.ShortPayIndexViewModel.ShortPay.Date.Value.ToString("MM/dd/yyyy"), new { @class = "normal" })
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td> <label class="thick">From:</label></td>
+                <td>
+                 @if (Model.ShortPayIndexViewModel.ShortPay.SentFrom!= null)
+                    {
+                       @Html.Label(@Model.ShortPayIndexViewModel.ShortPay.SentFrom, new { @class = "normal" })
+                    }
+                </td>
+                <td>  <label class="thick">CA Phone No:</label></td>
+                <td>
+                    @if (Model.ShortPayIndexViewModel.ShortPay.CAContactNo!=null)
+                    {
+                       @Html.Label(@Model.ShortPayIndexViewModel.ShortPay.CAContactNo, new { @class = "normal" })
+                    }
+                </td>
+            </tr>
+            <tr>
+                @if (Model.ShortPayIndexViewModel.ShortPay.Subject == null)
+                {
+                    Model.ShortPayIndexViewModel.ShortPay.Subject = string.Empty;
+                }
+                <td>@Html.Label("Subject:", new { @class = "thick" })</td>
+                <td>@Html.Label(@Model.ShortPayIndexViewModel.ShortPay.Subject, new { @class = "normal" })  </td>
+                <td> @Html.Label("Approved Payment Amount:", new { @class = "thick" })</td>
+                <td><label for="LBLApprovedPaymentAmtof" class="normal">@(String.Format("{0:C}", Model.ShortPayIndexViewModel.ShortPay.ApprovedPaymentAmount))</label></td>
+            </tr>
+
+        </table>
+
+    @Html.Label("Contracts Administrator Notes:", new { @class = "thick" })
+
+
+if (!String.IsNullOrEmpty(Model.ShortPayIndexViewModel.ShortPay.CANotes))
+{ 
+    <table style="width:65%">
+        <tr>
+            <td height="75" valign="top">
+                <label for="LBLCANotes" class="normal">@Model.ShortPayIndexViewModel.ShortPay.CANotes</label>
+            </td>
+        </tr>
+    </table>
+}
+
+
+<p style="margin-bottom:0px;margin-top: 30px">  @Html.Label("CA Adjustments:", new { @class = "thick" })</p>
+
+<div class="GridClass">
+    @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.InvoiceCAFindingsEmp>()
+                        .Name("CAFindingsEmpGridReadOnly")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.EmployeeName).Title("Description");
+                             columns.Bound(p => p.Classification).Title("Item Type");
+                             columns.Bound(p => p.InvoiceRate).Title("Inv Rates/Amt").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ApprovedRate).Title("Approved Rate/Amt").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.RateVariance).Title("Rate Variance").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.InvoiceHours).Title("Invoice Hrs").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ApprovedHours).Title("Approved Hrs").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Total).Title("Total Deduction").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Notes).HtmlAttributes(new { style = "Width:50%" });
+                         })
+                        .EnableCustomBinding(true)
+                         .BindTo((IEnumerable)Model.CATTFindingsViewModel.InvoiceCAFindingsEmp)
+    )
+</div>
+
+}
+            
+@if ((Model.CATTFindingsViewModel.InvoiceCATTFindings != null)  && (!String.IsNullOrEmpty(Model.CATTFindingsViewModel.ToCACSV)))
+{ 
+<div style="page-break-before:always">&nbsp;</div>
+<p class="TabHeading">Contract Attest Findings</p>
+
+    <p> @Html.Label("Recommendations/Results", new { @class = "thick" })</p>
+
+    <table style="width:100%">
+        <tr>
+            <td>
+                @Html.Label("Attest: Total adjustment of: ", new { @class = "thick" })
+
+                @if (Model.CATTFindingsViewModel.InvoiceCATTFindings.CATTRecommendedAdjustment.HasValue)
+                {
+                    <label for="LBLCATTAdjust" class="normal">@(String.Format("{0:C}", Model.CATTFindingsViewModel.InvoiceCATTFindings.CATTRecommendedAdjustment.Value))</label>
+                }
+            </td>
+            <td>
+                @Html.Label("for a Payment of: ", new { @class = "thick" })
+                <label for="LBLAssetPaymentof" class="normal"> @(String.Format("{0:C}", Model.CATTFindingsViewModel.AssetPayment))</label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span style="margin-right:14px">  @Html.Label("Approved adjustment of: ", new { @class = "thick" }) </span>
+                @if (Model.CATTFindingsViewModel.InvoiceCATTFindings.CARecommendedAdjustment.HasValue)
+                {
+                    <label for="LBLCAAdjust" class="normal">@(String.Format("{0:C}", Model.CATTFindingsViewModel.InvoiceCATTFindings.CARecommendedAdjustment.Value))</label>
+                }
+            </td>
+            <td>
+                @Html.Label("for a Payment of: ", new { @class = "thick" })
+                <label for="LBLApprovedPaymentof" class="normal">@(String.Format("{0:C}", Model.CATTFindingsViewModel.ApprovedPayment))</label>
+            </td>
+        </tr>
+    </table>
+
+    <table style="width:100%">
+        <tr>
+            <td>
+                @Html.Label("To: ", new { @class = "thick" })
+            </td>
+            <td>
+                @Html.Label(@Model.CATTFindingsViewModel.ToCACSV, new { @class = "normal" })
+            </td>
+            <td>
+                @Html.Label("Date:", new { @class = "thick" })
+            </td>
+            <td>
+            @if (Model.CATTFindingsViewModel.DateSubmit.HasValue)
+            {
+                 @Html.Label(@Model.CATTFindingsViewModel.DateSubmit.Value.ToString("MM/dd/yyyy"), new { @class = "normal" })
+            }
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.Label("From: ", new { @class = "thick" })
+            </td>
+            <td>
+                @Html.Label(@Model.CATTFindingsViewModel.FromCATTCSV, new { @class = "normal" })
+            </td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+
+ <p>@Html.Label("Contract Attest Notes:", new { @class = "thick" })</p>
+
+
+if (!String.IsNullOrEmpty(Model.CATTFindingsViewModel.InvoiceCATTFindings.CATTNotes))
+{
+    <table style="width:65%">
+        <tr>
+            <td height="75" valign="top">
+                    <label for="LBLCATTNotes" class="normal">@Model.CATTFindingsViewModel.InvoiceCATTFindings.CATTNotes</label>
+            </td>
+        </tr>
+    </table>
+}
+    <p style="margin-bottom:0px">  @Html.Label("CATT Adjustments:", new { @class = "thick" })</p>
+
+    <div class="GridClass">
+        @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.InvoiceCATTFindingsEmp>()
+            .Name("CATTFindingsEmpGridReadOnly")
+            .Columns(columns =>
+                {
+                    columns.Bound(p => p.EmployeeName).Title("Description");
+                    columns.Bound(p => p.Classification).Title("Item Type");
+                    columns.Bound(p => p.InvoiceRate).Title("Inv Rates/Amt").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                    columns.Bound(p => p.ApprovedRate).Title("Approved Rate/Amt").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                    columns.Bound(p => p.RateVariance).Title("Rate Variance").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                    columns.Bound(p => p.InvoiceHours).Title("Invoice Hrs").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                    columns.Bound(p => p.ApprovedHours).Title("Approved Hrs").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                    columns.Bound(p => p.Total).Title("Total Deduction").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                    columns.Bound(p => p.Notes).HtmlAttributes(new { style = "Width:50%" });
+                })
+                .EnableCustomBinding(true)
+                .BindTo((IEnumerable)Model.CATTFindingsViewModel.InvoiceCATTFindingsEmp)
+        )
+    </div>
+
+@Html.Label("Contracts Administrator Notes:", new { @class = "thick" })
+
+if (!String.IsNullOrEmpty(Model.CATTFindingsViewModel.InvoiceCATTFindings.CANotes))
+{
+    <table style="width:65%">
+        <tr>
+            <td height="75" valign="top">
+            
+                <label for="LBLCANotes" class="normal">@Model.CATTFindingsViewModel.InvoiceCATTFindings.CANotes</label>
+            
+            </td>
+        </tr>
+    </table>
+}
+
+<p style="margin-bottom:0px">  @Html.Label("CA Adjustments:", new { @class = "thick" })</p>
+
+<div class="GridClass">
+    @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.InvoiceCAFindingsEmp>()
+                        .Name("CAFindingsEmpGridReadOnly")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.EmployeeName).Title("Description");
+                             columns.Bound(p => p.Classification).Title("Item Type");
+                             columns.Bound(p => p.InvoiceRate).Title("Inv Rates/Amt").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ApprovedRate).Title("Approved Rate/Amt").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.RateVariance).Title("Rate Variance").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.InvoiceHours).Title("Invoice Hrs").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ApprovedHours).Title("Approved Hrs").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Total).Title("Total Deduction").Format("{0:C}").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Notes).HtmlAttributes(new { style = "Width:50%" });;
+                         })
+                        .EnableCustomBinding(true)
+                         .BindTo((IEnumerable)Model.CATTFindingsViewModel.InvoiceCAFindingsEmp)
+    )
+</div>
+    }

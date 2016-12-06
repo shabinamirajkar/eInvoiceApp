@@ -1,0 +1,181 @@
+﻿@*Shared Editable PO Order Details view*@
+@using System.Collections
+@using Kendo.Mvc.UI
+
+@model eInvoiceAutomationWeb.ViewModels.CATTFindingsViewModel
+
+<script type="text/javascript">
+
+    function calcRateVarianceTotal() {
+        var field = "RateVariance";
+        var grid = $("#CATTFindingsEmpGrid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var newValue = 0;
+        $.each(dataSource.data(), function (index, model) {
+            newValue += model.get(field);
+        });
+        return newValue;
+    }
+
+    function calcVarianceHoursTotal() {
+        var field = "VarianceHours";
+        var grid = $("#CATTFindingsEmpGrid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var newValue = 0;
+        $.each(dataSource.data(), function (index, model) {
+            newValue += model.get(field);
+        });
+        return newValue;
+    }
+
+</script>
+
+<div class="container-fluid border-box-sizing">
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("Document No: ", new { @class = "thick" })
+            @if (Model.DocumentNo != null)
+            {
+                <label id="lblDocumentNo">@Model.DocumentNo.ToString()</label>
+            }
+        </div>
+    </div>
+
+    @if (Model != null && Model.RoutingDetails != null)
+    {
+        <div class="row" id="invoiceDetailTable">
+            <div class="col-sm-12">
+                @Html.Partial("~/Views/Shared/_InvoiceDetailsReadOnly.cshtml", Model.RoutingDetails)
+            </div>
+        </div>
+    }
+</div>
+
+@Html.Label("Recommendations/Results", new { @class = "thick" })
+
+<div class="container-fluid border-box-sizing" style="width:73%">
+    <div class="row">
+        <div class="col-sm-12 divClassHeader">
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-4">
+                    @Html.Label("Attest: Total adjustment of: ", new { @class = "thick" })
+
+                    @if (Model.InvoiceCATTFindings.CATTRecommendedAdjustment.HasValue)
+                    {
+                        <label for="LBLCATTAdjust" class="normal">@(String.Format("{0:C}", Model.InvoiceCATTFindings.CATTRecommendedAdjustment.Value))</label>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    @Html.Label("for a Payment of: ", new { @class = "thick" })
+                    <label for="LBLAssetPaymentof" class="normal"> @(String.Format("{0:C}", Model.AssetPayment))</label>
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-4">
+                    <span style="margin-right:14px">  @Html.Label("Approved adjustment of: ", new { @class = "thick" }) </span>
+                    @if (Model.InvoiceCATTFindings.CARecommendedAdjustment.HasValue)
+                    {
+                        <label for="LBLCAAdjust" class="normal">@(String.Format("{0:C}", Model.InvoiceCATTFindings.CARecommendedAdjustment.Value))</label>
+                    }
+                </div>
+                <div class="col-sm-5">
+                    @Html.Label("for a Payment of: ", new { @class = "thick" })
+                    <label for="LBLApprovedPaymentof" class="normal">@(String.Format("{0:C}", Model.ApprovedPayment))</label>
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid border-box-sizing" style="width:73%">
+    <div class="row">
+        <div class="col-sm-12 divClassHeader" >
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-1">
+                    @Html.Label("To: ", new { @class = "thick" })
+                </div>
+                <div class="col-sm-3">
+                    @Html.Label(@Model.ToCACSV, new { @class = "normal" })
+                </div>
+                <div class="col-sm-1">
+                    @Html.Label("Date:", new { @class = "thick" })
+                </div>
+                <div class="col-sm-3">
+                    @Html.Label(@Model.DateSubmit.Value.ToString("MM/dd/yyyy"), new { @class = "normal" })
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+            <div class="row">
+                <div class="col-sm-1">
+                    @Html.Label("From: ", new { @class = "thick" })
+                </div>
+                <div class="col-sm-3">
+                    @Html.Label(@Model.FromCATTCSV, new { @class = "normal" })
+                </div>
+                <div class="col-sm-1">
+
+                </div>
+                <div class="col-sm-3">
+
+                </div>
+            </div>
+            <div style="height:5px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        @Html.Label("Contract Attest Notes:", new { @class = "thick" })
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <label for="LBLCATTNotes" class="normal">@Model.InvoiceCATTFindings.CATTNotes</label>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12" style="height:15px;"></div>
+</div>
+
+@Html.Label("CATT Adjustments:", new { @class = "thick" })
+
+<div class="row">
+    <div class="col-sm-11">
+        @Html.Partial("~/Views/CATTFindings/_CATTFindingsEmpGridReadOnly.cshtml", Model)
+    </div>
+    </div>
+
+<div class="row">
+    <div class="col-sm-12" style="height:15px;"></div>
+</div>
+
+<div class="row">
+            <div class="col-sm-12">
+                @Html.Label("Contracts Administrator Notes:", new { @class = "thick" })
+            </div>
+        </div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <label for="LBLCANotes" class="normal">@Model.InvoiceCATTFindings.CANotes</label>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12" style="height:15px;"></div>
+</div>
+
+@Html.Label("CA Adjustments:", new { @class = "thick" })
+
+<div class="row">
+    <div class="col-sm-11">
+        @Html.Partial("~/Views/CATTFindings/_CAFindingsEmpGridReadOnly.cshtml", Model)
+    </div>
+</div>

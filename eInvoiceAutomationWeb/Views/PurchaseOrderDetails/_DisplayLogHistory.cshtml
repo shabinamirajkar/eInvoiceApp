@@ -1,0 +1,63 @@
+﻿@using System.Collections
+@using Kendo.Mvc.UI
+@model eInvoiceAutomationWeb.ViewModels.PurchaseOrderDetailsViewModel
+
+@{
+    ViewBag.Title = "PO Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+ 
+ <div class="container-fluid">
+      @if (Model != null)
+       {
+            <div class="row">
+                <div class="col-sm-12">
+                    @Html.Label("Change History:", new { @class = "thick" })
+                </div>
+            </div>
+          
+            <div class="row">
+                <div class="col-sm-11">
+                    @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.AccountingCostCodesChangeHistoryViewModel>()
+                      .Name("AccountingCostCodesChangeHistoryGrid")
+                     .Columns(columns =>
+                      {
+                         columns.Bound(p => p.PONumber).Width(50).Title("PO#");
+                         columns.Bound(p => p.POLine).Width(50).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.GLAccount).Width(50).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.CostCenter).Width(50).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.WBS).Width(50);
+                         columns.Bound(p => p.Fund).Width(50).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.FunctionalArea).Width(50);
+                         columns.Bound(p => p.GrantNumber).Width(50).Title("Grant");
+                         columns.Bound(p => p.InternalOrder).Width(50);
+                         columns.Bound(p => p.InvoiceAmount).Width(50).Title("Amount").HtmlAttributes(new { style = "text-align:right" }).ClientTemplate("#= kendo.format('{0:c}',InvoiceAmount) #");
+                         columns.Bound(p => p.Notes).Width(70);
+                         columns.Bound(p => p.EditedByUserID).Width(50);
+                         columns.Bound(p => p.EditedByDate).Width(50);
+                         columns.Bound(p => p.LogAction);
+                      })
+                     .Sortable()
+                     .Pageable()
+                     .Navigatable()
+                  
+                     .DataSource(dataSource =>
+                       dataSource.Ajax()
+                       .PageSize(20)
+                       .Batch(true)
+                       .ServerOperation(false)
+                       .Model(model =>
+                       {
+                           model.Id(p => p.LogID);
+                       })
+                      .Read(read => read.Action("AccountingCostCodesChangeHistory_Read", "PurchaseOrderDetails"))
+                      ))
+                 </div>
+                <div class="col-sm-1">
+                </div>
+            </div>
+      
+       }
+    </div>
+

@@ -1,0 +1,22 @@
+﻿@using System.Collections
+@model string
+
+
+@(Html.Kendo().DropDownList()
+   .BindTo((IEnumerable)ViewBag.SAPPONumbers)
+   .DataValueField("FormattedPONumber")
+   .DataTextField("FormattedPONumber")
+   .ValuePrimitive(true)
+   .Name("SAPPONumber").HtmlAttributes(new { @Style = "font-size:12px;" })
+   .OptionLabel("- please select -")
+)
+
+
+
+
+
+
+
+
+
+

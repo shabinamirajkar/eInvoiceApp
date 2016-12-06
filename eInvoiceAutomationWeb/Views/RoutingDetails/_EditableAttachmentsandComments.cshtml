@@ -1,0 +1,216 @@
+﻿@*Shared View of Attachments and Comments grids*@
+
+@model eInvoiceAutomationWeb.ViewModels.RoutingDetailsViewModel
+<link href="@Url.Content("~/Content/Custom.css")" rel="stylesheet" type="text/css" />
+
+<script>
+    var errorShown = false;
+
+    function refreshAttachGrid() {
+        $(".k-upload-files.k-reset").find("li").parent().remove();
+        alert("Attachment uploaded successfully");
+        var grid = $("#AttachmentsGrid").data("kendoGrid");
+        if (grid != null)
+            grid.dataSource.read();
+        var win = $("#attachKendoWin").data("kendoWindow");
+        win.close();
+    }
+
+    $(document).ready(function () {
+        $.ajaxSetup({ cache: false });
+    });
+
+    function deleteRow(e) {
+        var userName = @Html.Raw(Json.Encode(ViewBag.LoginUser));
+        e.preventDefault ? e.preventDefault() : e.returnValue = false;
+        var grid = $("#AttachmentsGrid").data("kendoGrid");
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var uploadedUser = dataItem.UploadedUserID;
+        if(uploadedUser != dataItem.LoggedUserID)
+            alert("This attachment was uploaded by another user and it cannot be deleted.");
+        else  {
+            grid.removeRow($(e.target).closest("tr"));
+            grid.dataSource.sync();
+        }
+    }
+
+    function OnError(e, status) {
+        if (e.errors) {
+            var message = "Error:\n";
+            var grid = $('#AttachmentsGrid').data('kendoGrid');
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        if (key == "Delete" ) {
+                            message += this + "\n";
+                            alert(message);
+                            $('#AttachmentsGrid').data('kendoGrid').dataSource.read();
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    function OnDeactivate (e) {
+        //this.destroy();
+    }
+
+    $("#Comment").focusout(function () {
+        // var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@()]/);
+        // if($(this).val() != null && $(this).val() != '' && !(pattern.test($(this).val())))
+        //alert("Comments:" + $(this).val())
+        if($(this).val() != null && $(this).val() != '')  {
+            $.getJSON('@Url.Action("SaveComment", "RoutingDetails")', { Comment: $(this).val() }, function (data) {
+                // var grid = $("#CommentsGrid").data("kendoGrid");
+                //if (grid != null)
+                //    grid.dataSource.read();
+            });
+        }
+        //else {
+        //    if ($(this).val() != '')
+        //      alert("Please enter valid characters in Comments without using any special characters except -,.");
+        //}
+    });
+
+    function openWindow(url, title)
+    {
+        var win = $("#attachKendoWin").data("kendoWindow");
+        $("#attachKendoWin").children(".k-content-frame").contents().find("#divAttach").attr("style", "visibility: hidden");
+        kendo.ui.progress($("#attachKendoWin"), true);
+        win.refresh();
+        win.center();
+        win.open(); 
+    }
+
+    function refresh() {
+        kendo.ui.progress($("#attachKendoWin"), false);
+    }
+ 
+    
+</script>
+
+<div id="form" class="container-fluid border-box-sizing">
+
+    @(Html.Kendo().Window()
+        .Name("attachKendoWin")
+        .Title("Attach File")
+        .Modal(true)
+        .Content("loading ...")
+        .LoadContentFrom("RoutingDetailsUploadFile", "RoutingDetails")
+        .Iframe(true)
+        .Visible(false)
+        .Height(100)
+        .Draggable()
+        .Resizable()
+        .Events(events => events.Refresh("refresh"))
+     )
+
+    <div style="height:20px;"></div>
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("Comments", new { @class = "thick" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            @if (Model.Comment == null)
+            {
+                Model.Comment = string.Empty;
+            }
+            <textarea id="Comment" style="width: 90%;" class="custom-input" maxlength="1000">@Model.Comment</textarea>
+        </div>
+    </div>
+    <div style="height:10px;"></div>
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("Comments History", new { @class = "thick" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.CommentsViewModel>()
+                        .Name("CommentsGrid")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.InvoiceCommentID).Visible(false);
+                             columns.Bound(p => p.CommentDate).Width(30);
+                             columns.Bound(p => p.Comment).Width(250);
+                             columns.Bound(p => p.CommentBy).Width(30);
+                         })
+                           .Sortable()
+                           .Pageable()
+                           .Navigatable()
+                           .AutoBind(true)
+                           .DataSource(dataSource =>
+                               dataSource.Ajax()
+                              .PageSize(10)
+                              .ServerOperation(false)
+                              .Model(model =>
+                               {
+                                   model.Id(p => p.InvoiceCommentID);
+                               })
+                             .Read(read => read.Action("Comments_Read", "RoutingDetails"))
+                      ))
+        </div>
+    </div>
+    <div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12" style="height:14px">
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("Attachment: ", new { @class = "thick" })
+
+            <a href="javascript: openWindow('@Url.Action("RoutingDetailsUploadFile", "RoutingDetails")', 'Upload Attachment')">
+                Click here to Upload File
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+        <div class="col-sm-12" style="height:14px">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.AttachmentsViewModel>()
+              .Name("AttachmentsGrid")
+               .Columns(columns =>
+                  {
+                      columns.Bound(p => p.InvoiceAttachmentID).Visible(false);
+                      columns.Bound(p => p.FileName).ClientTemplate("<a href='" + Url.Action("DownloadAttachment", "RoutingDetails", new { attachmentID = "#=InvoiceAttachmentID#" }) + "'>#=FileName#</a>");
+                      columns.Bound(p => p.UploadedUserID);
+                      columns.Command(command => command.Custom("Delete").Click("deleteRow"));
+                  })
+                  .Editable(editable => editable.Mode(GridEditMode.InLine))
+                  .Sortable()
+                  .Pageable()
+                  .Navigatable()
+                  .DataSource(dataSource =>
+                        dataSource.Ajax()
+                       .Events(e => e.Error("OnError"))
+                       .PageSize(10)
+                       .ServerOperation(false)
+                       .Model(model =>
+                         {
+                             model.Id(p => p.InvoiceAttachmentID);
+                         })
+                       .Read(read => read.Action("Attachments_Read", "RoutingDetails"))
+                       .Destroy(destroy => destroy.Action("Attachments_Destroy", "RoutingDetails"))
+            ))
+        </div>
+    </div>
+
+</div>
+
+

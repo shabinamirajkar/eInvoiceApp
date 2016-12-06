@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<!-- InfoMajesty Inc. 02/26/2015 Layout used by eInvoice Approval Form Screens which need the TabStrip -->
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+
+  @Scripts.Render("~/bundles/modernizr")
+@Styles.Render("~/Content/kendo/css")
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryui")
+@Scripts.Render("~/bundles/kendo")
+@Scripts.Render("~/bundles/bootstrap")
+@Styles.Render("~/Content/ElementStyles")
+
+<!--This CSS entry was added by the Telerik VS Extensions for compatibility reasons-->
+<link href="@Url.Content("~/Content/kendo.compatibility.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.default.min.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+<script src="@Url.Content("~/Scripts/kendo/2014.3.1316/jquery.min.js")"></script>
+<script src="@Url.Content("~/Scripts/kendo/2014.3.1316/jszip.min.js")"></script>
+<script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.all.min.js")"></script>
+<script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.aspnetmvc.min.js")"></script>
+<script src="@Url.Content("~/Scripts/kendo.modernizr.custom.js")"></script>
+<script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+<link href="@Url.Content("~/Content/Custom.css")" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+    <nav class="navbar navbar-inverse " style="border:none; border-color:transparent">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a id="headerImage" href="@Url.Action("Home", "Home")">
+                        <img src="~/Content/Images/Misc/VTAeInvoice.jpg" style="text-decoration: none; border: 0px; width:100%; text-align:left" />
+                    </a>
+                </div>
+            </div>
+
+            <div class="row" style="font-weight:bold;background-color:lightgray">
+                <div class="col-sm-6">
+                    <div class="navbar-collapse collapse">
+                        <ul class="nav navbar-nav" style="font-weight:bold;background-color:lightgray">
+                            <li>@Html.ActionLink("eInvoice Dashboard", "Dashboard", "AdminTools")</li>
+
+                            <li>@Html.ActionLink("Accounts Payable", "eInvoice", "Home")</li>
+
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">System Tools <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li>@Html.ActionLink("Roles Admin", "RolesAdmin", "AdminTools")</li>
+                                    <li class="divider"></li>
+                                    <li>@Html.ActionLink("Config Escalation", "ConfigEscalation", "AdminTools")</li>
+                                    <li class="divider"></li>
+                                    <li>@Html.ActionLink("Config Miscellaneous Data", "ConfigMiscData", "AdminTools")</li>
+                                </ul>
+                            </li>
+
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help Center <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li>@Html.ActionLink("Home", "Home", "Home")</li>
+                                    <li class="divider"></li>
+                                    <li>@Html.ActionLink("Help", "FixUploadIssue", "RoutingDetails")</li>
+                                    @*<li>@Html.ActionLink("Help", "Async", "Home")</li>*@
+                                    @*<li class="divider"></li>
+                                        <li>@Html.ActionLink("Test Upload", "TestUpload", "Home")</li>*@
+                                </ul>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+                    @* 06/29/2015 - Post UAT Changes - Build 6 *@
+                    @if (Convert.ToBoolean(TempData["ReadOnly"]) == false)
+                        {
+                        <h4 class="headerfont" style="text-align:left">eInvoice Approval Form</h4>
+                        }
+                    else
+                        {
+                        <h4 class="headerfont" style="text-align:left">eInvoice Approval Report</h4>
+                        }
+                </div>
+
+                <div class="col-sm-3">
+                    @if (Session["LoggedInUserName"] != null)
+                        {
+                        <p class="nav navbar-text navbar-right" style="font-weight:bold; font-size: 12px">
+                            Welcome @Session["LoggedInUserName"].ToString()
+                        </p>
+                        }
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-sm-12">
+
+                    @RenderBody()
+                </div>
+
+            </div>
+
+
+
+        </div>
+    </nav>
+
+</body>
+
+</html>
+
+
+
+
+

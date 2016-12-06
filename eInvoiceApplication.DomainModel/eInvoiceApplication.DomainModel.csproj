@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FD7DB0A5-F153-41E8-A88A-5DF3FFD720B8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>eInvoiceApplication.DomainModel</RootNamespace>
+    <AssemblyName>eInvoiceApplication.DomainModel</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.6.1.2\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConfigMiscData.cs" />
+    <Compile Include="ConfigEscalation.cs" />
+    <Compile Include="AdminRole.cs" />
+    <Compile Include="ConfigRole.cs" />
+    <Compile Include="ConfigRouteRole.cs" />
+    <Compile Include="InvoiceGridTotalsforPDF.cs" />
+    <Compile Include="InvoiceErrorLog.cs" />
+    <Compile Include="eInvoiceModelContext.cs" />
+    <Compile Include="InvoiceAdminRoleForCRUD.cs" />
+    <Compile Include="InvoiceAttachment.cs" />
+    <Compile Include="InvoiceCATTFindings.cs" />
+    <Compile Include="InvoiceCAFindingsEmp.cs" />
+    <Compile Include="InvoiceCATTFindingsEmp.cs" />
+    <Compile Include="InvoiceComment.cs" />
+    <Compile Include="InvoiceMaster.cs" />
+    <Compile Include="InvoicePOApprover.cs" />
+    <Compile Include="InvoicePOApproverMemoryProfile.cs" />
+    <Compile Include="InvoicePODetail.cs" />
+    <Compile Include="InvoicePODetailChanges.cs" />
+    <Compile Include="InvoicePODetailChangesLog.cs" />
+    <Compile Include="InvoiceRoutingRecord.cs" />
+    <Compile Include="InvoiceShortPayLetter.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DashboardReport.cs" />
+    <Compile Include="StatusReportDropdown.cs" />
+    <Compile Include="TempActionsDropdown.cs" />
+    <Compile Include="TempErrorMessage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SAPSourceMasterApplication.DomainModel\SAPSourceMasterApplication.DomainModel.csproj">
+      <Project>{bfa3ef75-5742-4f10-9673-8b79726c458c}</Project>
+      <Name>SAPSourceMasterApplication.DomainModel</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

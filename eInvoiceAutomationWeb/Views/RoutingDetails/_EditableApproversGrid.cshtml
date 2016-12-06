@@ -1,0 +1,190 @@
+﻿@*Shared View of Editable Approvers grid Test SM 12/0 11:08AM *@
+
+@model eInvoiceAutomationWeb.ViewModels.RoutingDetailsViewModel
+
+<script type="text/javascript">
+    var editRow; //This should be Global variable
+
+    function roleFilter(element) { 
+        element.kendoDropDownList({
+            dataSource: {
+                transport: {
+                    read: "@Url.Action("BindRoleFilter","RoutingDetails")"
+                }
+            },
+            dataTextField: "Role",
+            dataValueField: "RoleID",
+            optionLabel: "--Select Value--"
+        });
+    }
+
+
+    function filterPOLines() {
+        var grid = $("#EditableApproversGrid").data("kendoGrid");
+        //get the row in edit mode and its item
+        var editRow = grid.tbody.find("tr:has(.k-edit-cell)");
+        var model = grid.dataItem(editRow);
+        return {
+            PONumber: model.PONumberField
+        };
+    }
+
+    function onExchangeApproverChange(e) {
+        var selectedValue = $(e.sender.text());
+        var grid = $("#EditableApproversGrid").data("kendoGrid");
+        var editRow = grid.tbody.find("tr:has(.k-edit-cell)");
+        var currentDataItem = grid.dataItem(editRow);
+        if (selectedValue.selector.toString() == null)
+            currentDataItem.set("Approver", "");
+        else
+            currentDataItem.set("Approver", selectedValue.selector.toString());
+    }
+
+
+    $(document).ready(function () {
+
+        window.onbeforeunload = function (e) {
+            var grid = $("#EditableApproversGrid").data("kendoGrid");
+            if (grid != null) {
+                ds = grid.dataSource;
+                var dirty = false;
+                $.each(ds._data, function () {
+                    if (this.dirty == true) {
+                        dirty = true;
+                    }
+                });
+                if (ds._destroyed.length > 0)
+                    dirty = true;
+                if (dirty) {
+                    if (!confirm("View has unsaved changes, are you sure you want to leave the page?")) {
+                        e.preventDefault();
+                    }
+                }
+            }
+        }
+    });
+
+
+    /* Wire validation */
+    (function ($, kendo) {
+        $.extend(true, kendo.ui.validator, {
+            rules:
+              {
+                  Approver: function (input) {
+                      if (input.is(" [name='ApproverUserId']") && input.val() == "- please select -") {
+                          return false;
+                      }
+                      return true;
+                  },
+
+                  RoleName: function (input) {
+                      if (input.is("[name='RoleId']") && input.val() == "") {
+                          return false;
+                      }
+                      return true;
+                  }
+              },
+            messages:
+            {
+                Approver: function (input) {
+                    return "Please select a valid Approver";
+                },
+                RoleName: function (input) {
+                    return "Please select a valid Role";
+                }
+            }
+        });
+    })(jQuery, kendo);
+
+
+    function onEdit(e) {
+        $("#EditableApproversGrid tbody [data-role=dropdownlist]").each(function () {
+            var ddl = $(this).data("kendoDropDownList");
+            if (ddl != null) {
+                ddl.options.optionLabel = "- please select -";
+                ddl.refresh();
+                ddl.value("");
+            }
+
+        })
+    }
+
+</script>
+
+
+
+<div id="form" class="container-fluid border-box-sizing">
+    <div id="defaultApproversTable">
+        @if (Model != null)
+        {
+            <div class="row">
+                <div class="col-sm-12">
+                    @Html.Label("Approvers", new { @class = "thick" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.ApproversViewModel>()
+                     .Name("EditableApproversGrid")
+                     .Columns(columns =>
+                     {
+                         columns.Bound(p => p.InvoicePOApproverID).Visible(false);
+                         columns.Bound(p => p.InvoiceMasterID).Visible(false);
+                         columns.Bound(p => p.RoleName).EditorTemplateName("_RoleName").Filterable(filterable => filterable.UI("roleFilter")).Title("Role").ClientTemplate("#: RoleName #");
+                         columns.ForeignKey(p => p.PONumberField, (System.Collections.IEnumerable)ViewBag.PONumbers, "PONumber", "FormattedPONumber").Title("PO");
+                         columns.Bound(p => p.POLine).EditorTemplateName("_POLine").Title("PO Line").HtmlAttributes(new { style = "text-align:right" });
+                         columns.ForeignKey(p => p.ApproverUserId, (System.Collections.IEnumerable)ViewBag.MemoryApprovers, "UserID", "Concatenated").EditorTemplateName("_Approvers").Title("Approver");
+                        // columns.Bound(p => p.ApproverUserId).EditorTemplateName("_Approvers").Title("Approver").ClientTemplate("#: Approver #");
+                         columns.Bound(p => p.ApproverSuggestedBySAP).Title("Suggested Approver / Role");
+                         columns.Command(command =>
+                         {
+                             command.Destroy();
+                         }).Title("Commands").Width(200);
+                     })
+                     .Filterable(filterable => filterable
+                     .Extra(false)
+                     .Operators(operators => operators
+                        .ForString(str => str.Clear()
+                        .StartsWith("Starts with")
+                        .IsEqualTo("Is equal to")
+                        .IsNotEqualTo("Is not equal to")
+                        .Contains("contains")
+                      )))
+                   .ToolBar(toolbar =>
+                   {
+                       toolbar.Create();
+                   })
+                  .Editable(editable => editable.Mode(GridEditMode.InCell))
+                  .Sortable()
+                  .Pageable()
+                  .Navigatable()
+                  .Events(events => events.Edit("onEdit"))
+                  .AutoBind(true)
+                   .DataSource(dataSource =>
+                     dataSource.Ajax()
+                     .PageSize(10)
+                     .Batch(true)
+                     .ServerOperation(false)
+                     .AutoSync(true)
+                     .Model(model =>
+                      {
+                           model.Id(p => p.InvoicePOApproverID);
+                           model.Field(p => p.ApproverSuggestedBySAP).Editable(true);
+                           model.Field(p => p.PONumberField).DefaultValue(ViewData["defaultPONumber"] );
+                           model.Field(p => p.RoleName).DefaultValue(ViewData["defaultRole"]);
+                      })
+                    .Create(create => create.Action("Approvers_Create", "RoutingDetails"))
+                    .Read(read => read.Action("Approvers_Read", "RoutingDetails"))
+                    .Update(update => update.Action("Approvers_Update", "RoutingDetails"))
+                    .Destroy(destroy => destroy.Action("Approvers_Destroy", "RoutingDetails"))
+                   )  )
+                </div>
+            </div>
+        }
+    </div>
+ </div>
+
+
+
+
+

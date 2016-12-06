@@ -1,0 +1,119 @@
+﻿@*Shared Read Only PO Order Details view*@
+@using System.Collections
+@using Kendo.Mvc.UI
+@model eInvoiceAutomationWeb.ViewModels.PurchaseOrderDetailsViewModel
+
+
+<script type="text/javascript">
+
+    function openWindow(url, title) {
+        window.open(url, '_blank');
+    }
+
+</script>
+
+<div class="container-fluid border-box-sizing">
+
+   @if (Model != null && Model.RoutingDetails != null)
+   {
+     <div class="row">
+        <div class="col-sm-12">
+           @Html.Partial("~/Views/Shared/_InvoiceDetailsReadOnly.cshtml", Model.RoutingDetails)
+        </div>
+     </div>
+   }
+   
+   <div class="row" style="width:100%">
+       <div class="col-sm-6">
+           @Html.Label("Document No: ", new { @class = "thick" })
+           @if (Model.DocumentNo != null)
+            {
+                <label id="txtDocumentNo">@Model.DocumentNo.ToString()</label>
+            }
+       </div>
+       <div class="col-sm-6">
+       </div>
+   </div>
+
+   @if (Model != null)
+   {
+      <div class="row">
+          <div class="col-sm-12">
+             @Html.Partial("~/Views/PurchaseOrderDetails/_AccountingCostCodesReadOnly.cshtml", Model)
+          </div>
+      </div>
+   }
+ 
+   <div style="height:10px"></div>
+
+   <div class="row">
+       <div class="col-sm-3">
+           @Html.Label("SES(s) Needed:", new { @class = "thick" })
+           @if (Model.RoutingDetails.InvoiceDetails.SESNumber == null)
+           {
+                Model.RoutingDetails.InvoiceDetails.SESNumber = string.Empty;
+           }
+           @Html.Label(@Model.RoutingDetails.InvoiceDetails.SESNumber, new { @class = "normal" })
+       </div>
+       <div class="col-sm-9">
+       </div>
+   </div>
+
+   <div style="height:15px"></div>
+
+   <div class="row">
+        <div class="col-sm-4">
+            @Html.Label("Indicate correct PO Line assignment below:", new { @class = "thick" })
+            <a href="javascript: openWindow('@Url.Action("DisplayLogHistory", "PurchaseOrderDetails")', 'Change History')">
+                Change History
+            </a>
+        </div>
+        <div class="col-sm-8">
+        </div>
+   </div>
+
+    <div style="height:15px"></div>
+
+    <div class="row">
+        <div class="col-sm-12" id="modifyCostCodesReadOnlyGrid">
+            @(Html.Kendo().Grid<eInvoiceAutomationWeb.ViewModels.ModifyAccountingCostCodesViewModel>()
+                     .Name("ModifyAccountingReadOnlyGrid")
+                     .Columns(columns =>
+                     {
+                         columns.Bound(p => p.InvoiceDetailChangesID).Visible(false);
+                         columns.Bound(p => p.InvoiceMasterID).Visible(false);
+                         columns.Bound(p => p.SAPPONumber).Title("PO#");
+                         columns.Bound(p => p.SAPPOLine).Title("PO Line").HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.GLAccount).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.CostCenter).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.WBSNo).Title("WBS");
+                         columns.Bound(p => p.Fund).HtmlAttributes(new { style = "text-align:right" });
+                         columns.Bound(p => p.FunctionalArea);
+                         columns.Bound(p => p.GrantNumber).Title("Grant");
+                         columns.Bound(p => p.InternalOrder);
+                         columns.Bound(p => p.InvoiceAmount).Title("Amount").Width(200).HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                              .ClientTemplate("#= kendo.format('{0:c}',InvoiceAmount) #").ClientFooterTemplate("<div>Total: #= kendo.format('{0:c}',sum) #</div>");
+                         columns.Bound(p => p.Notes).Width(200);
+                         columns.Bound(p => p.EditedFlag).Title("Edited");
+                     })
+                     .Sortable()
+                     .Pageable()
+                     .Navigatable()
+                     .DataSource(dataSource =>
+                      dataSource.Ajax()
+                     .Aggregates(aggregates =>
+                      {
+                          aggregates.Add(p => p.InvoiceAmount).Sum();
+                      })
+                     .PageSize(10)
+                     .Model(model =>
+                       {
+                           model.Id(p => p.InvoiceDetailChangesID);
+                       })
+                    .Read(read => read.Action("ModifyAccountingCostCodes_Read", "PurchaseOrderDetails"))
+                 ))
+        </div>
+    </div>  
+
+</div>
+

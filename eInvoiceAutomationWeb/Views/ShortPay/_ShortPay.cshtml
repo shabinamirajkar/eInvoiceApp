@@ -1,0 +1,332 @@
+﻿@*Editable Short Pay View*@
+
+@model eInvoiceAutomationWeb.ViewModels.ShortPayIndexViewModel
+
+<html>
+<head>
+    <title></title>
+  
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $.ajaxSetup({ cache: false });
+
+        });
+
+
+        $(function () {
+            var container = $("#shortPayForm");
+            kendo.init(container);
+            container.kendoValidator({
+                rules: {
+                    validmask: function (input) {
+                        
+                        if (input.is("[data-validmask-msg]") && input.val() != "") {
+                           
+                            var maskedtextbox = input.data("kendoMaskedTextBox");
+                            if (maskedtextbox.value().indexOf(maskedtextbox.options.promptChar) == -1) {
+                                UpdateInvoiceShortPay()
+                            }
+                            return maskedtextbox.value().indexOf(maskedtextbox.options.promptChar) === -1;
+                        }
+                        UpdateInvoiceShortPay()
+                        return true;
+                    }
+                }
+            });
+        });
+
+
+        $("#ShortPayDatePicker").focusout(function () {
+            if (($(this).val() != null)) {
+                UpdateInvoiceShortPay()
+            }
+        });
+
+
+        $("#txtVendor").focusout(function () {
+            // var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@(),.-]/);
+            //  var reg = /[0-9]/;
+            // if (($(this).val() != null && $(this).val() != '' && !(pattern.test($(this).val()) || (reg.test($(this).val())))) || ($(this).val() == '') ) {
+            if (($(this).val() != null)) {
+                UpdateInvoiceShortPay()
+            }
+            //else {
+            //  if ($(this).val() != '')
+            //    alert("Please enter valid characters in Vendor field");
+            //}
+        });
+
+
+        $("#ShortPaySubject").focusout(function () {
+            // var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@()]/);
+            // if (($(this).val() != null && $(this).val() != '' && !(pattern.test($(this).val()))) || ($(this).val() == '')) {
+            if (($(this).val() != null)) {
+                UpdateInvoiceShortPay()
+            }
+            //else {
+            //    if ($(this).val() != '')
+            //      alert("Please enter valid characters in Subject without using any special characters except -,.");
+            //}
+        });
+
+
+        $("#CANotes").focusout(function () {
+            // var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@()]/);
+            //  if ( ($(this).val() != null && $(this).val() != '' && !(pattern.test($(this).val()))) || ($(this).val() == '') ) {
+            if (($(this).val() != null)) {
+                UpdateInvoiceShortPay()
+            }
+            //else {
+            //    if ($(this).val() != '')
+            //      alert("Please enter valid characters in Contract Administrator Notes without using any special characters except -,.");
+            //}
+        });
+
+
+        //$("#CAContactNo").focusout(function () {
+        //    if (($(this).val() != null && $(this).val() != '')) {
+        //        UpdateInvoiceShortPay()
+        //    }
+        //});
+
+
+        function onSentFromUserIDChange(e) {
+            if ($(this.value() != null)) {
+                UpdateInvoiceShortPay();
+            }
+        }
+
+
+        function UpdateInvoiceShortPay() {
+            var FromCA = $("#SentFromUserID").data("kendoMultiSelect").value();
+
+            //Set the Value in hidden TextBox
+            $("#txtCA").val(FromCA);
+
+            $.getJSON('@Url.Action("SaveShortPayDetails", "ShortPay")',
+              {
+                  AddressedTo: $("#txtVendor").val(),
+                  SentFrom: $("#txtCA").val(),
+                  Subject: $("#ShortPaySubject").val(),
+                  Date: $("#ShortPayDatePicker").val(),
+                  CAContactNo: $("#CAContactNo").val(),
+                  CANotes: $("#CANotes").val(),
+                  ApprovedPaymentAmount: $("#txtApprovedPaymentAmount").val()
+              });
+        }
+
+    </script>
+</head>
+
+<body>
+
+    <div class="container-fluid border-box-sizing">
+
+        <div class="row" style="width:100%">
+                <div class="col-sm-6">
+                    @Html.Label("Document No: ", new { @class = "thick" })
+                    @if (Model.DocumentNo != null)
+                    {
+                        <label id="txtDocumentNo">@Model.DocumentNo.ToString()</label>
+                    }
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="col-sm-5">
+                 @if (Model != null && Model.RoutingDetails != null)
+                 {
+                   if(Model.RoutingDetails.InvoiceDetails.Status!="Rejected")
+                   { 
+                     <input type="button" class="btn-primary" value="View ShortPay" onclick="@("window.open('" + @Url.Action("GenerateShortPayPDF", "ShortPayPDF", new { DocumentNo = Model.DocumentNo }) + "')") ;" />
+                   }
+                 }
+               </div>
+       </div>
+
+        @if (Model != null && Model.RoutingDetails != null)
+         {
+              <div class="row" id="invoiceDetailTable">
+                 <div class="col-sm-12">
+                     @Html.Partial("~/Views/Shared/_InvoiceDetailsReadOnly.cshtml", Model.RoutingDetails)
+                  </div>
+              </div>
+          }
+    </div>
+
+    <div style="height:10px;"></div>
+
+    <div class="container-fluid border-box-sizing">
+
+        <form id="shortPayForm" data-role="validator" novalidate="novalidate">
+            <div class="row">
+                <div class="col-sm-12 divClassHeader">
+                    <div style="height:5px;"></div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label class="thick">To:</label>
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="txtVendor" value="@Model.ShortPay.AddressedTo" class="input-text" maxlength="50" style="width:1000px" />
+                        </div>
+                        <div class="col-sm-2">
+                            @Html.Label("Date:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-4">
+                            @(Html.Kendo().DatePicker()
+                            .Name("ShortPayDatePicker")
+                            .Value(@Model.ShortPay.Date)
+                            .HtmlAttributes(new { style = "width:150px" }))
+                        </div>
+                    </div>
+
+                    <div style="height:10px;"></div>
+
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label title="Maximum of four people allowed" class="thick">From:</label>
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="txtCA" hidden="hidden">
+                            @(Html.Kendo().MultiSelect()
+                                  .Name("SentFromUserID").HtmlAttributes(new { @Style = "font-size:12px;" })
+                                  .DataValueField("ApproverUserID")
+                                  .DataTextField("ApproverName")
+                                  .Filter("contains")
+                                  .MinLength(1)
+                                  .MaxSelectedItems(4)
+                                  .Delay(10)
+                                  .IgnoreCase(true)
+                                  .Value(Model.SentFrom)
+                                  .Events(e => e.Change("onSentFromUserIDChange"))
+                                  .DataSource(source =>
+                                   {
+                                       source.Read(read =>
+                                       {
+                                           read.Action("FetchApprovers", "ShortPay");
+                                       });
+                                   })
+                            )
+                        </div>
+
+                        <div class="col-sm-2">
+                            @Html.Label("CA Phone No:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-4">
+                            @(Html.Kendo().MaskedTextBox()
+                           .Name("CAContactNo")
+                           .Mask("999-000-0000")
+                           .Value(Model.ShortPay.CAContactNo)
+                           .HtmlAttributes(new
+                            {
+                                data_validmask_msg = "CA Phone No is incomplete"
+                            })
+                            )
+                        </div>
+                    </div>
+
+                    <div style="height:10px;"></div>
+
+                    <div class="row">
+                        @if (Model.ShortPay.Subject == null)
+                        {
+                            Model.ShortPay.Subject = string.Empty;
+                        }
+                        <div class="col-sm-2">
+                            @Html.Label("Subject:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="ShortPaySubject" value="@Model.ShortPay.Subject" class="input-text" maxlength="200" style="width:1000px" />
+                        </div>
+                        <div class="col-sm-2">
+                            @Html.Label("Approved Payment Amount:", new { @class = "thick" })
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="normal">@(String.Format("{0:C}", Model.ShortPay.ApprovedPaymentAmount))</label>
+                            <input type="text" id="txtApprovedPaymentAmount" hidden="hidden" value=@Model.ShortPay.ApprovedPaymentAmount.Value>
+                        </div>
+                    </div>
+
+                    <div style="height:10px;"></div>
+                </div>
+
+          </div>
+      </form>
+    </div>
+
+    <div style="height:10px;"></div>
+
+    <div class="row">
+       <div class="col-sm-12">
+           @Html.Label("Contract Administrator Notes:", new { @class = "thick" })
+       </div>
+    </div>
+
+    <div class="row">
+       <div class="col-sm-12">
+          @if (Model.ShortPay.CANotes == null)
+          {
+              Model.ShortPay.CANotes = string.Empty;
+          }
+          <textarea id="CANotes" style="width:90%;height:110px" class="custom-input" maxlength="1000">@Model.ShortPay.CANotes</textarea>
+      </div>
+   </div>
+ 
+   <div style="height:10px;"></div>
+    
+   <div class="row">
+        <div class="col-sm-12">
+            @Html.Label("CA Adjustments:", new { @class = "thick" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            @(Html.Kendo().Grid<eInvoiceApplication.DomainModel.InvoiceCAFindingsEmp>()
+                        .Name("CAFindingsEmpGridReadOnly")
+                        .Columns(columns =>
+                         {
+                             columns.Bound(p => p.InvoiceCAFindingsEmpID).Visible(false);
+                             columns.Bound(p => p.InvoiceCATTFindingsID).Visible(false);
+                             columns.Bound(p => p.EmployeeName).Title("Description").Width("12%")
+                                  .ClientFooterTemplate("<div>Total:</div>");
+                             columns.Bound(p => p.Classification).Title("Item Type").Width("10%");
+                             columns.Bound(p => p.InvoiceRate).Title("Inv Rates/Amt").Width("5%").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                                  .ClientTemplate("#= kendo.format('{0:c}',InvoiceRate) #");
+                             columns.Bound(p => p.ApprovedRate).Title("Approved Rate/Amt").Width("5%").HtmlAttributes(new { style = "text-align:right" })
+                                 .ClientTemplate("#= kendo.format('{0:c}',ApprovedRate) #");
+                             columns.Bound(p => p.RateVariance).Title("Rate Variance").Width("5%").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                             .ClientTemplate("#= kendo.format('{0:c}',RateVariance) #")
+                             .ClientFooterTemplate("<div>#= kendo.format('{0:c}',sum) #</div>");
+                             columns.Bound(p => p.InvoiceHours).Title("Invoice Hrs").Width("5%").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.ApprovedHours).Title("Approved Hrs").Width("5%").HtmlAttributes(new { style = "text-align:right" });
+                             columns.Bound(p => p.Total).Title("Total Deduction").Width("7%").HtmlAttributes(new { style = "text-align:right" }).FooterHtmlAttributes(new { style = "text-align:right" })
+                                   .ClientTemplate("#= kendo.format('{0:c}',Total) #")
+                                   .ClientFooterTemplate("<div>#= kendo.format('{0:c}',sum) #</div>");
+                             columns.Bound(p => p.Notes).Width("24%");
+                         })
+                            .Sortable()
+                            .Pageable()
+                            .Navigatable()
+                            .AutoBind(true)
+                            .DataSource(dataSource =>
+                                  dataSource.Ajax()
+                                  .Aggregates(aggregates =>
+                                     {
+                                          aggregates.Add(p => p.RateVariance).Sum();
+                                          aggregates.Add(p => p.Total).Sum();
+                                     })
+                                   .PageSize(10)
+                                   .Model(model =>
+                                     {
+                                         model.Id(p => p.InvoiceCAFindingsEmpID);
+                                     })
+                                   .Read(read => read.Action("CAFindingsEmp_Read", "ShortPay")) )
+            )
+         </div>
+    </div>
+
+
+    
+</body>
+</html>

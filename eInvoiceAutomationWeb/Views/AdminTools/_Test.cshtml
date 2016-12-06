@@ -1,0 +1,64 @@
+﻿@Styles.Render("~/Content/kendo/css")
+
+@Scripts.Render("~/bundles/kendo")
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Kendo UI Snippet</title>
+
+    @Styles.Render("~/Content/kendo/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/kendo")
+    @Styles.Render("~/Content/ElementStyles")
+    <!--This CSS entry was added by the Tel n erik VS Extensions for compatibility reasons-->
+    <link href="@Url.Content("~/Content/kendo.compatibility.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.default.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2014.3.1316/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2014.3.1316/kendo.web.min.js")"></script>
+    @*<link href="@Url.Content("~/Content/Custom.css")" rel="stylesheet" type="text/css" />*@
+    <script type="text/javascript" src="@Url.Content("~/Scripts/Custom.js")"></script>
+</head>
+<body>
+
+    <div id="email-settings">
+        <div>
+            @(Html.Kendo().DatePicker()
+              .Name("datepicker")
+              .Value("10/10/2011")
+              .HtmlAttributes(new { style = "width:150px" })
+            )
+        </div>
+        <div>
+            @(Html.Kendo().DatePicker()
+              .Name("monthpicker")
+              .Start(CalendarView.Year)
+              .Depth(CalendarView.Year)
+              .Format("MMMM yyyy")
+              .Value("November 2011")
+              .HtmlAttributes(new { style = "width:150px" })
+            )
+        </div>
+    </div>
+    <style>
+    #example h2 {
+        font-weight: normal;
+    }
+    #email-settings {
+        height: 135px;
+        width: 395px;
+        margin: 30px auto;
+        padding: 110px 0 0 30px;
+        background: url('@Url.Content("~/Content/web/datepicker/mailSettings.png")') transparent no-repeat 0 0;
+    }
+
+    </style>
+
+</body>
+</html>

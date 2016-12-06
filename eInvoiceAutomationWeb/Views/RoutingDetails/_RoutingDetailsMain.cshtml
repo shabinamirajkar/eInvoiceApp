@@ -1,0 +1,152 @@
+﻿@*This View will be invoked only for AP and FAP, to enter document no and Load From SAP *@
+
+@using System.Collections
+@using Kendo.Mvc.UI
+@model eInvoiceAutomationWeb.ViewModels.RoutingDetailsViewModel
+
+
+<script type="text/javascript">
+    var routeToText;
+    var editRow;
+
+    function onBegin() {
+        $('#loadError').hide(0);
+        $('#divChildPartial').hide(0);
+        $('#divProcessing').show(0);
+    }
+
+    function onComplete() {
+        $('#divProcessing').hide(0);
+        $('#divChildPartial').show(0);
+        $('#loadError').hide(0);
+    }
+
+    function onSuccess() {
+        $('#divProcessing').hide(0);
+        $('#divChildPartial').show(0);
+        $('#loadError').hide(0);
+
+        var serialNo = $("#hdnSNFlag").val();
+        var tabStrip = $("#tabstrip").kendoTabStrip().data("kendoTabStrip");
+        if (serialNo == null || serialNo == '') {
+            $(tabStrip.items()[1]).show();
+        }
+        else {
+            @*var invalidMsg = @Html.Raw(Json.Encode(TempData["InvalidDocMsg"]));
+            if(invalidMsg != null && invalidMsg != ''){
+                $(tabStrip.items()[1]).show();
+                $(tabStrip.items()[2]).hide();
+                $(tabStrip.items()[3]).hide();
+                $(tabStrip.items()[4]).hide();
+             }
+            else{*@
+            $(tabStrip.items()[1]).show();
+            $(tabStrip.items()[2]).show();
+            $(tabStrip.items()[3]).show();
+            $(tabStrip.items()[4]).show();
+            @* }*@
+        }
+    }
+
+    function onFailure() {
+        $('#loadError').show(0);
+        $('#divProcessing').hide(0);
+    }
+
+
+    $("#btnPrintPDF").on('click', function () {
+        // 06/29/2015 - Post UAT Changes - Build 6
+        var documentNo = $('#txtDocumentNo').val();
+        if (documentNo != null && documentNo != '') {
+            var newURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname.split('/')[1].toString()
+                            + "/eInvoicePDF/GeneratePDF?DocumentNo=" + $('#txtDocumentNo').val();
+            //  $(this).attr("href", newURL);
+            var win = window.open(newURL, '_blank');
+            if (win) {
+                win.focus();
+            }
+        }
+        else {
+            alert("Cannot open the PDF for blank Document No");
+        }
+    });
+
+
+    //$("#txtDocumentNo").focusout(function () {
+    //    var pattern = new RegExp(/[~`!#%\^&*+=\[\]\\';/{}|\\":<>\?@@(),.-]/);
+    //    if ($(this).val() != null && $(this).val() != '' && (pattern.test($(this).val().trim()) || !((/^[0-9]+$/).test($(this).val().trim())) )) {
+    //      alert("Please enter valid numeric characters in Document No");
+    //   }
+    //});
+
+</script>
+
+@using (Ajax.BeginForm("InvoiceDetails", "RoutingDetails", new AjaxOptions()
+                                                   {
+                                                       OnBegin = "onBegin",
+                                                       OnComplete = "onComplete",
+                                                       OnFailure = "onFailure",
+                                                       OnSuccess = "onSuccess",
+                                                       HttpMethod = "POST",
+                                                       UpdateTargetId = "divChildPartial",
+                                                   }, new { encType = "multipart/form-data" }))
+{
+  
+   <div class="container-fluid border-box-sizing">
+    @if (Model != null)
+    {        
+         <div class="row">
+             <div class="col-sm-12">
+                 @Html.Label("Document No: ", new { @class = "thick" })
+                 <input type="text" id="txtDocumentNo" name="DocumentNo" class="custom-input" value="@Model.DocumentNo" maxlength="10" />
+                 <input type="hidden" name="SN" value="@Model.SN" id="hdnSNFlag" />
+                 <input type="submit" value="Load From SAP" id="btnLoad" class="btn-link" />
+
+                  @* // 06/29/2015 - Post UAT Changes - Build 6 *@
+                  @* <a href='#' id="btnPrintPDF" target="_blank" style="margin-left:10px">*@
+                 @*@if (Model.InvoiceDetails!=null)
+                 { 
+                    if(Model.InvoiceDetails.Status!="Rejected")
+                    {*@
+                        <a href='#' id="btnPrintPDF" style="margin-left:10px">
+                            <img src="~/Content/Images/Misc/print-button.png" value="Print" id="btnPrint" height="25" width="25" title="Print Preview" />
+                        </a>
+                    @*}
+                 }*@
+            </div>
+         </div>
+   }
+
+    <div class="row">
+          <div class="col-sm-12">
+              <div id="divProcessing" class="progressBarLoad">
+                  <img src="~/Content/Images/Misc/ajax-loader.gif">
+               </div>
+          </div>
+     </div>
+
+     <div class="row">
+          <div class="col-sm-12">
+              <div id="loadError" class="loadError">
+                  <h3>An error was encountered while searching the database. Please try again.</h3>
+               </div>
+          </div>
+     </div>
+
+     <div class="row">
+         <div class="col-sm-12">
+            <div id="divChildPartial">
+                 @if (Model.InvoiceDetails != null)
+                  {
+                      @Html.Partial("~/Views/RoutingDetails/_RoutingDetails.cshtml")
+                  }
+             </div>
+          </div>
+     </div>
+ </div>
+ }
+
+
+
+
+

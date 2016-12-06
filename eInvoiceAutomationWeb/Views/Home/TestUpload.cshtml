@@ -1,0 +1,145 @@
+﻿@{
+    Layout = null;
+}
+
+@Scripts.Render("~/bundles/jquery")
+
+@*@using (Ajax.BeginForm("UploadFile", "Home", new AjaxOptions()
+                                                        {
+                                                            OnBegin = "onBegin",
+                                                            OnComplete = "onComplete",
+                                                            OnSuccess = "onSuccess",
+                                                            HttpMethod = "POST",
+                                                            UpdateTargetId = "result",
+                                                        }, new { encType = "multipart/form-data" }))
+{
+        <input type='file' name='file' id='file' />
+        <input type="submit" value="upload" />
+
+
+    <div id="result" hidden="hidden">
+        <label> File uploaded succesfully</label>
+     </div>
+    
+
+}*@
+
+@*<div>
+    <input type="file" name="UploadFile" id="txtUploadFile" />
+</div>*@ 
+
+<div id="divUploadFileAdd">
+    <form enctype="multipart/form-data" id="frmUplaodFileAdd">
+
+        @Html.AntiForgeryToken()
+        <input id="fuPDFAdd" name="file" type="file" />
+        <input class="gbtn" id="btnUploadAdd" type="button" value="Upload" />
+        <label id="txtuploadedMsgAdd"> </label>
+
+    </form>
+</div>
+
+<script type="text/javascript">
+   // function onBegin() {
+   //     $('#result').hide(0);
+   //     $('#divProcessing').show(0);
+   // }
+
+   // function onComplete() {
+       
+   //     alert("File Uploaded succesfully");
+   //     $('#divProcessing').hide(0);
+   //     $('#result').show(0);
+      
+   // }
+
+   // function onSuccess() {
+   //     alert("File Uploaded succesfully");
+   //     $('#divProcessing').hide(0);
+   //     $('#result').show(0);
+   //}
+
+       @*$('#txtUploadFile').on('change', function (e) {
+           var files = e.target.files;
+           if (files.length > 0) {
+               if (window.FormData !== undefined) {
+                   var data = new FormData();
+                   for (var x = 0; x < files.length; x++){
+                       data.append("file" + x, files[x]);
+                   }
+                   debugger;
+                   $.ajax({
+                       type: "POST",
+                       url: '@Url.Action("UploadAttachments", "RoutingDetails")',
+                       contentType: false,
+                       processData: false,
+                       data: data,
+                       success: function(result) {
+
+                       },
+                       error: function (xhr, status, p3, p4){
+                           var err = "Error " + " " + status + " " + p3 + " " + p4;
+                           if (xhr.responseText && xhr.responseText[0] == "{")
+                               err = JSON.parse(xhr.responseText).Message;
+
+                       }
+                   });
+               } else {
+                   alert("This browser doesn't support HTML5 file uploads!");
+               }
+           }
+       });*@
+
+
+    $("#fuPDFAdd").change(function () {
+        var file = this.files[0];
+        var fileName;
+        fileName = file.name;
+        size = file.size;
+        type = file.type;
+        $("#txtuploadedMsgAdd").text("");
+        $("#btnUploadAdd").show();
+
+    });
+
+    $("#btnUploadAdd").click(function () {
+
+        
+        var formData = new FormData($('#frmUplaodFileAdd')[0]);
+        
+        if (window.FormData !== undefined) {
+            alert('formdata defined')
+            debugger;
+            var data = new FormData();
+        }
+        else
+            {alert('formData undefined')}
+            debugger;
+        $.ajax({
+            url: '@Url.Action("TestUpload", "Home")',  //Server script to process data
+            type: 'POST',
+            xhr: function () {  // Custom XMLHttpRequest
+                var myXhr = $.ajaxSettings.xhr();
+                if (myXhr.upload) { // Check if upload property exists
+                    myXhr.upload.addEventListener('progress',
+                    progressHandlingFunction, false); // For handling the progress of the upload
+                }
+                return myXhr;
+            },
+            data: formData,
+            //Options to tell jQuery not to process data or worry about content-type.
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+    });
+
+    //If file is successfully uploaded, label is updated with message
+    function progressHandlingFunction(e) {
+        if (e.lengthComputable) {
+            $("#divAddInforamtionDialog").show();
+            $("#txtuploadedMsgAdd").text("  " + fileName + " uploaded successfully");
+        }
+    }
+
+</script>

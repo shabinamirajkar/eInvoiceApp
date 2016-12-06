@@ -1,0 +1,716 @@
+﻿@*This View will be invoked when AP or FAP clicks on Load From SAP Test RS*@
+@*It loads the Invoice Details Header grid, Approvers grid, Comments and Attachments grids*@
+
+@model eInvoiceAutomationWeb.ViewModels.RoutingDetailsViewModel
+@using System.Collections
+<html>
+<head>
+    <title></title>
+    <script src="@Url.Content("~/Scripts/CommonScripts.js")"></script>
+    <script type="text/javascript">
+    var editRow; //This should be Global variable
+    var container, wnd, options;
+    var dirty = false;
+
+    // Add the div to initialize to the DOM
+    container = $('<div />').attr('id', 'window').appendTo(document.body);
+
+    function refreshAfterUpload() {
+        $(".k-upload-files.k-reset").find("li").parent().remove();
+        alert("Invoice has been successfully uploaded to SharePoint.");
+        var uploadInvoiceWnd = $("#uploadInvoiceKendoWin").data("kendoWindow");
+        uploadInvoiceWnd.close();
+    }
+
+    // Read a page's GET URL variables and return them as an associative array.
+    function getUrlVars() {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for (var i = 0; i < hashes.length; i++) {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
+    }
+
+    $(document).ready(function () {
+        $.ajaxSetup({ cache: false });
+        var serialNo = $("#hdnFlag").val();
+        var docNo = $("#hdnFlagForDocNo").val();
+
+        window.onbeforeunload = function (e) {
+            var grid = $("#EditableApproversGrid").data("kendoGrid");
+            if ((grid != null && grid.dataSource.hasChanges())) {
+                if (!confirm("View has unsaved changes, are you sure you want to leave the page?")) {
+                    e.preventDefault();
+                }
+            }
+        }
+
+
+        // Disable the Non Contracting Checkbox for FAP
+        //debugger;
+        //alert('serialNo:' + serialNo);
+        //if (serialNo != null && serialNo != '') {
+        //    document.getElementById('chkNonContractingStatus').disabled = "disabled"
+        //}
+
+
+        $("#btnSubmit").click(function () {
+            @* 07/02/2015 - Post UAT Changes - Build 8*@
+            $("#btnSubmit").prop("disabled", true);
+
+
+            // // Getting URL var by its nam
+            var SharedUser = getParameterByName('SharedUser');
+            //alert('s user name:' + SharedUser);
+            var approverRole
+            //if (document.getElementById('chkNonContractingStatus').checked) {
+            if ($("#ddlInvoiceType").data("kendoDropDownList").value() == "NonContract") {
+                approverRole = $("#ddlApproverRolesNonContracting").data("kendoDropDownList");
+            }
+            else if ($("#ddlInvoiceType").data("kendoDropDownList").value() == "Contract") {
+                approverRole = $("#ddlApproverRoles").data("kendoDropDownList");
+            }
+            else {
+                approverRole = $("#ddlApproverRolesManual").data("kendoDropDownList");
+            }
+            var value = approverRole.value();
+            if ($("#ddlInvoiceType").data("kendoDropDownList").value() == "-1") {
+                $("#btnSubmit").prop("disabled", false);
+                alert("Please select Invoice Type from the dropdown")
+            }
+            else if (value == 0) {
+                @* 07/02/2015 - Post UAT Changes - Build 8*@
+                $("#btnSubmit").prop("disabled", false);
+                alert("Please select an Action from the dropdown");
+            }
+
+            else {
+                var button = $("#btnSubmit");
+                var content = button.val();
+                // code which gets excecuted for 'Submit w/o Approval' button click
+                if (content == "Submit w/o Approval") {
+                    $.getJSON('@Url.Action("Validate", "RoutingDetails")', { RouteTo: value, isReadOnly: false, DocumentNo: docNo, SN: serialNo }, function (data) {
+                        if (data == true) {
+                            options = {
+                                title: "Validation Summary",
+                                content: {
+                                    url: "@Url.Action("DisplayValidations", "RoutingDetails")",
+                                },
+                                modal: true,
+                                visible: false,
+                                position: {
+                                    top: "45%",
+                                    left: "30%"
+                                }
+                            };
+                            @* 07/02/2015 - Post UAT Changes - Build 8*@
+                            $("#btnSubmit").prop("disabled", false);
+                            wnd = container.kendoWindow(options).data('kendoWindow').open();
+                        }
+                        else {
+                            var comment = $("#Comment").val();
+                            if ((comment == null || comment == '') && (serialNo != null && serialNo != '')) {
+                                @* 07/02/2015 - Post UAT Changes - Build 8*@
+                                $("#btnSubmit").prop("disabled", false);
+
+                                alert('This action needs Comments, please provide them in Comments section!');
+                            }
+                            else {
+                                $.getJSON('@Url.Action("Submit", "RoutingDetails")', {
+                                    RouteTo: value, isReadOnly: false, serialNo: serialNo,
+                                    documentNo: docNo, Comment: comment, SharedUser: SharedUser
+                                }, function (data) {
+                                    @* 07/02/2015 - Post UAT Changes - Build 8*@
+                                    $("#btnSubmit").prop("disabled", false);
+
+                                    alert("Your eInvoice request has been submitted successfully!");
+                                    location.href = '@Url.Content("~/AdminTools/Dashboard")';
+                                });
+                            }
+                        }
+                    });
+                }
+                    // code which gets excecuted for 'Routing Complete' button click
+                else if (content == "Routing Completed") {
+                    @* 07/02/2015 - Post UAT Changes - Build 8*@
+                    $('#divBusyProcessing').show(0);
+
+                    $.getJSON('@Url.Action("ValidateApproveClick", "RoutingDetails")', { documentNo: docNo, isReadOnly: false, SN: serialNo }, function (data) {
+                        if (data == true) {
+                            @* 07/02/2015 - Post UAT Changes - Build 8*@
+                            $('#divBusyProcessing').hide(0);
+
+                            options = {
+                                title: "Validation Summary",
+                                content: {
+                                    url: "@Url.Action("DisplayValidations", "RoutingDetails")",
+                                },
+                                modal: true,
+                                visible: false,
+                                position: {
+                                    top: "45%",
+                                    left: "30%"
+                                }
+                            };
+                            @* 07/02/2015 - Post UAT Changes - Build 8*@
+                            $("#btnSubmit").prop("disabled", false);
+                            wnd = container.kendoWindow(options).data('kendoWindow').open();
+                        }
+                        else if (data == false) {
+                            var comment = $("#Comment").val();
+                            $.getJSON('@Url.Action("Approve", "RoutingDetails")', { serialNo: serialNo, documentNo: docNo, Comment: comment, SharedUser: SharedUser }, function (data) {
+                                if (isNaN(data)) {
+                                    @* 07/02/2015 - Post UAT Changes - Build 8*@
+                                    $("#btnSubmit").prop("disabled", false);
+                                    $('#divBusyProcessing').hide(0);
+                                    alert(data);
+                                }
+                                else {
+                                    @* 07/02/2015 - Post UAT Changes - Build 8*@
+                                    $("#btnSubmit").prop("disabled", false);
+                                    $('#divBusyProcessing').hide(0);
+                                    alert("Your eInvoice request has been submitted successfully!");
+                                    location.href = '@Url.Content("~/AdminTools/Dashboard")';
+                                }
+                            });
+                        }
+                        else {
+                            @* 07/02/2015 - Post UAT Changes - Build 8*@
+                            $("#btnSubmit").prop("disabled", false);
+                            $('#divBusyProcessing').hide(0);
+                            alert(data);
+                        }
+                    });
+                }
+                    // code which gets excecuted for 'Rejected' button click
+                else {
+                    var kendoWindow = $("<div />").kendoWindow({
+                        title: "Confirm",
+                        width: "300px",
+                        modal: true
+                    });
+                    var comment = $("#Comment").val();
+                    kendoWindow.data("kendoWindow").content($("#confirmation").html()).center().open();
+                    kendoWindow.find(".confirm,.cancel").click(function () {
+                        if ($(this).hasClass("confirm")) {
+
+                            if (comment == null || comment == '') {
+                                @* 07/02/2015 - Post UAT Changes - Build 8*@
+                                $("#btnSubmit").prop("disabled", false);
+                                alert('Please provide the reason for rejecting eInvoice request in comments section !');
+                            }
+                            else {
+                                $.getJSON('@Url.Action("Reject", "RoutingDetails")', { serialNo: serialNo, documentNo: docNo, Comment: comment, SharedUser: SharedUser }, function (data) {
+                                    @* 07/02/2015 - Post UAT Changes - Build 8*@
+                                    $("#btnSubmit").prop("disabled", false);
+                                    alert('You have rejected to submit the eInvoice request!');
+                                    location.href = '@Url.Content("~/AdminTools/Dashboard")';
+                                });
+                            }
+                        }
+                            @* 07/02/2015 - Post UAT Changes - Build 8*@
+                        else {
+                            $("#btnSubmit").prop("disabled", false);
+                        }
+                        kendoWindow.data("kendoWindow").close();
+                    }).end()
+                }
+            }
+        });
+        $("#btnSave").click(function () {
+            SaveApproversGrid();
+        });
+    });
+
+
+    function onCATTApprovalChange(e) {
+        $.getJSON('@Url.Action("SaveCATTApproval", "RoutingDetails")', { CATTApproval: e.checked }, function (data) { });
+    }
+
+    function onNonContractingStatusChange(e) {
+        //debugger;
+
+        //if ((e.sender.text() == "- select an Action -") ||  (e.sender.text() == "Contracting")) {
+        //    $('#spanDDLContract').show();
+        //    $('#spanDDLNonContract').hide();
+        //    $("input[name='CheckBox']:checkbox").show();
+        //    $('#lblCATT').show();
+        //}
+
+        //else {
+        //    $('#spanDDLContract').show();
+        //    $('#spanDDLNonContract').hide();
+        //    $("input[name='CheckBox']:checkbox").show();
+        //    $('#lblCATT').show();
+        //}
+
+        ////if (document.getElementById('chkNonContractingStatus').checked) {
+        var dropdown = $("#ddlInvoiceType").data("kendoDropDownList");
+        if (dropdown != null)
+            selectedValue = dropdown.value();
+
+        if (selectedValue == "NonContract") {
+            $('#spanDDLContract').hide();
+            $('#spanDDLManual').hide();
+            $('#spanDDLNonContract').show();
+            $("input[name='CheckBox']:checkbox").hide();
+            $('#lblCATT').hide();
+        }
+        else if (selectedValue == "Contract") {
+            $('#spanDDLContract').show();
+            $('#spanDDLNonContract').hide();
+            $('#spanDDLManual').hide();
+            $("input[name='CheckBox']:checkbox").show();
+            $('#lblCATT').show();
+        }
+        else if (selectedValue == "Manual") {
+            $('#spanDDLManual').show();
+            $('#spanDDLContract').hide();
+            $('#spanDDLNonContract').hide();
+            $("input[name='CheckBox']:checkbox").hide();
+            $('#lblCATT').hide();
+        }
+        $.getJSON('@Url.Action("SaveInvoiceType", "RoutingDetails")', { InvoiceType: selectedValue }, function (data) { });
+
+        @*$.getJSON('@Url.Action("SaveInvoiceType", "RoutingDetails")', { InvoiceType: selectedValue }, function (data) { 
+            var grid = $("#EditableApproversGrid").data("kendoGrid");
+            if (grid != null) {
+            //var ddl = $("#RoleName").data("kendoDropDownList");//grid.data("kendoDropDownList");
+            alert("grid not null")
+            grid.dataSource.read();
+            grid.dataSource.sync();
+            grid.refresh();
+            }
+        });*@
+
+        //if (ddl != null) {
+        //    alert("ddl not null")
+        //    ddl.dataSource.read();
+        //    ddl.dataSource.sync();
+        //    ddl.refresh();
+        //}
+    }
+
+    var resizeDropDown = function (e) {
+        var $dropDown = $(e.sender.element),
+        dataWidth = $dropDown.data("kendoDropDownList").list.width(),
+        listWidth = dataWidth + 15,
+        containerWidth = listWidth + 5;
+
+        // Set widths to the new values
+        $dropDown.data("kendoDropDownList").list.width(listWidth);
+        $dropDown.closest(".k-widget").width(containerWidth);
+    }
+
+
+    function onActionChange(e) {
+        if (e.sender.text() == "- select an Action -")
+            document.getElementById("btnSubmit").value = "Submit w/o Approval";
+        else {
+            var selectedValue = $(e.sender.text());
+            if (selectedValue.selector.toString() == "Routing Complete")
+                document.getElementById("btnSubmit").value = "Routing Completed";
+            else if (selectedValue.selector.toString() == "Reject")
+                document.getElementById("btnSubmit").value = "Rejected";
+            else
+                document.getElementById("btnSubmit").value = "Submit w/o Approval";
+        }
+    }
+
+
+    function OnDateChange(e) {
+        var selectedValue;
+        var dateString;
+        var datepicker = $("#datepicker").data("kendoDatePicker");
+        if (datepicker != null) {
+            selectedValue = datepicker.value();
+            var myDate = new Date(selectedValue);
+            dateString = myDate.toDateString();
+        }
+        $.getJSON('@Url.Action("SavePaymentDueBy", "RoutingDetails")', { PaymentDueBy: dateString }, function (data) { });
+    }
+
+
+    function OnThresholdChange(e) {
+        var selectedValue;
+        var dropdown = $("#CATTThresholds").data("kendoDropDownList");
+        if (dropdown != null)
+            selectedValue = dropdown.value();
+        $.getJSON('@Url.Action("SaveCATTThreshold", "RoutingDetails")', { CATTThreshold: selectedValue.toString() }, function (data) {
+        });
+    }
+
+
+    $("#Project").focusout(function () {
+        //var pattern = new RegExp(/[~`!%\^&*+=\[\]\\';{}|\\":<>\?@@()]/);
+        // if ($(this).val() != null && $(this).val() != '' && !(pattern.test($(this).val()))) {
+        if ($(this).val() != null) {
+            $.getJSON('@Url.Action("SaveProject", "RoutingDetails")', { Project: $(this).val() }, function (data) { });
+        }
+        //else {
+        //    if ($(this).val() != '')
+        //       alert("Please enter valid characters in Project without using any special characters except -,.#/");
+        //}
+    });
+
+
+    $("#Period").focusout(function () {
+        // var pattern = new RegExp(/[~`!%\^&*+=\[\]\\';{}|\\":<>\?@@()]/);
+        // if ($(this).val() != null && $(this).val() != '' && !(pattern.test($(this).val()))) {
+        if ($(this).val() != null) {
+            $.getJSON('@Url.Action("SavePeriod", "RoutingDetails")', { Period: $(this).val() }, function (data) {
+            });
+        }
+        //else {
+        //    if ($(this).val() != '')
+        //       alert("Please enter valid characters in Description/Period without using any special characters except -,.#/");
+        //}
+    });
+
+
+    $("#ContractNo").focusout(function () {
+        if ($(this).val() != null) {
+            $.getJSON('@Url.Action("SaveContractNo", "RoutingDetails")', { ContractNo: $(this).val() }, function (data) {
+            });
+        }
+    });
+
+    function openUploadInvoiceWindow(url, title) {
+        var uploadWnd = $("#uploadInvoiceKendoWin").data("kendoWindow");
+        $("#uploadInvoiceKendoWin").children(".k-content-frame").contents().find("#divAttach").attr("style", "visibility: hidden");
+        kendo.ui.progress($("#uploadInvoiceKendoWin"), true);
+        uploadWnd.refresh();
+        uploadWnd.center();
+        uploadWnd.open();
+    }
+
+    function refresh() {
+        kendo.ui.progress($("#uploadInvoiceKendoWin"), false);
+    }
+</script>
+
+ </head>
+
+<body>
+    <div id="form" class="container-fluid border-box-sizing">
+        <form class="form-horizontal">
+            @if (Model != null)
+            {
+                @(Html.Kendo().Window() 
+                   .Name("uploadInvoiceKendoWin")
+                   .Title("Attach Invoice")
+                   .Modal(true) 
+                   .Content("loading ...")
+                   .LoadContentFrom("UploadInvoiceToSharePoint", "RoutingDetails")
+                   .Iframe(true)
+                   .Visible(false)
+                   .Height(100)
+                   .Draggable()
+                   .Resizable()
+                   .Events(events => events.Refresh("refresh"))
+                )
+                <div style="height:20px;"></div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        @Html.Label("Invoice Details:", new { @class = "thick" })
+                        @if (Model.ShowPOWarning != null && Model.ShowPOWarning == true)
+                        {
+                            <font id="warning" size="3" title="Note: PO Validity End Date had ended" color="orange">*</font>
+                        }
+                        <input type="hidden" value="@Model.SN" id="hdnFlag" />
+                        <input type="hidden" value="@Model.DocumentNo" id="hdnFlagForDocNo" />
+                        @* 08/03/2015 - Post UAT Changes - Build 9*@
+                        <a href="javascript: openUploadInvoiceWindow('@Url.Action("UploadInvoiceToSharePoint", "RoutingDetails")', 'Upload Invoice To SharePoint')">
+                            Upload Invoice To SharePoint
+                        </a>
+                    </div>
+                  
+
+                    @* 07/02/2015 - Post UAT Changes - Build 8*@
+                    <div class="col-sm-3">
+                        <div id="divBusyProcessing" hidden="hidden">
+                            <img style='margin-top:1%; margin-left:50%;' src="~/Content/Images/Misc/ajax-loader.gif">
+                        </div>
+                        @* SM 03/11/2016 - Phase 2*@
+                        @* SM 10/17/2016 - Phase 3*@
+                        @Html.Label("Invoice Type: ", new { @class = "thick" })
+                        <span id="divNoContractInvoice">
+                            @(Html.Kendo().DropDownList()
+                                  .Name("ddlInvoiceType")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .Events(e => e.Change("onNonContractingStatusChange"))
+                                  .BindTo(new List<SelectListItem>() {
+                                      new SelectListItem() {
+                                          Text = "- select an Action -",
+                                          Value = "-1"
+                                      },
+                                      new SelectListItem() {
+                                          Text = "Contracting",
+                                          Value = "Contract"
+                                      },
+                                      new SelectListItem() {
+                                          Text = "Non-Contracting",
+                                          Value = "NonContract"
+                                      },
+                                      new SelectListItem() {
+                                          Text = "Manual Routing",
+                                          Value = "Manual"
+                                      }
+                                  })
+                                  //.Value(@Model.InvoiceDetails.NonContractingStatus.ToString())                                  
+                                 .Value(@Model.InvoiceDetails.InvoiceType.ToString())
+                            )
+                        </span>  
+                     </div>
+
+                     <div class="col-sm-6" id="divRoute">
+                         @* 07/01/2015 - Post UAT Changes - Build 8 *@
+                         @Html.ActionLink("View Invoice Documents", "ViewSharePointInvoices", "RoutingDetails",
+                             new { DocumentNo = @Model.DocumentNo.ToString(),
+                                   VendorNo = @Model.InvoiceDetails.VendorNo.ToString(), 
+                                InvoiceNo=@Model.InvoiceDetails.InvoiceNo.ToString() }, 
+                             new { target = "_blank" })
+                          &nbsp; &nbsp;
+                         @Html.Label("Action: ", new { @class = "thick" })
+                         <span id="spanDDLContract">
+                             @(Html.Kendo().DropDownList()
+                           .Name("ddlApproverRoles").HtmlAttributes(new { @Style = "height:80%; margin:0px 0px 4px 0px;" })
+                           .DataValueField("ActionId")
+                           .DataTextField("ActionName")
+                           .BindTo((IEnumerable)ViewBag.InvoiceStatusApproverRoles)
+                           .Events(e =>
+                            {
+                               e.Change("onActionChange");
+                               e.DataBound("resizeDropDown");
+                            })
+                           .OptionLabel("- select an Action -"))
+                          </span>
+                          <span id="spanDDLNonContract" style="display:none">
+                             @(Html.Kendo().DropDownList()
+                           .Name("ddlApproverRolesNonContracting").HtmlAttributes(new { @Style = "height:80%; margin:0px 0px 4px 0px" })
+                           .DataValueField("ActionId")
+                           .DataTextField("ActionName")
+                            .BindTo((IEnumerable)ViewBag.InvoiceStatusApproverRolesNonContracting)
+                           .Events(e =>
+                            {
+                                e.Change("onActionChange");
+                                e.DataBound("resizeDropDown");
+                            })
+                           .OptionLabel("- select an Action -"))
+                           </span>
+                         <span id="spanDDLManual" style="display:none">
+                             @(Html.Kendo().DropDownList()
+                            .Name("ddlApproverRolesManual").HtmlAttributes(new { @Style = "height:80%; margin:0px 0px 4px 0px" })
+                           .DataValueField("ActionId")
+                           .DataTextField("ActionName")
+                           .BindTo((IEnumerable)ViewBag.InvoiceStatusApproverRolesManual)
+                           .Events(e =>
+                            {
+                                e.Change("onActionChange");
+                                e.DataBound("resizeDropDown");
+                            })
+                           .OptionLabel("- select an Action -"))
+                         </span>
+                             <input type="button" value="Submit w/o Approval" id="btnSubmit" class="btn-primary" title="Click here to Proceed" />
+                             @if (Model.ShowSaveButton == true)
+                         {
+                                 <input type="button" value="Save" id="btnSave" class="btn-primary" title="Click here to Save" />
+                         }
+                         </div>
+                 </div>
+                
+                 <div class="row">
+                     <div class="col-sm-12 divClassHeader">
+                          <div style="height:5px;"></div>
+                            <div class="row">
+                              <div class="col-sm-2">
+                                    @Html.Label("Vendor:", new { @class = "thick" })
+                              </div>
+                              <div class="col-sm-4">
+                                    @Html.Label(@Model.InvoiceDetails.VendorName, new { @class = "normal" })
+                              </div>
+                              <div class="col-sm-2">
+                                    @Html.Label("Vendor #:", new { @class = "thick" })
+                              </div>
+                              <div class="col-sm-4">
+                                    @Html.Label(@Model.InvoiceDetails.VendorNo.TrimStart('0'), new { @class = "normal" })
+                              </div>
+                            </div>
+                            <div style="height:5px;"></div>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    @Html.Label("Description/Period:", new { @class = "thick" })
+                                </div>
+                                <div class="col-sm-4">
+                                    <input class="custom-input" type="text" id="Period" name="PeriodDesc" value="@Model.InvoiceDetails.Period" style="width:500px" />
+                                </div>
+                                <div class="col-sm-2">
+                                    @Html.Label("Contract #:", new { @class = "thick" })
+                                </div>
+                                <div class="col-sm-4">
+                                    @if (Model.InvoiceDetails.ContractNo == null)
+                                {
+                                    Model.InvoiceDetails.ContractNo = string.Empty;
+                                }
+                                    <input class="custom-input" type="text" id="ContractNo" name="ContractNoDesc" value="@Model.InvoiceDetails.ContractNo" />
+                                </div>
+                            </div>
+                            <div style="height:5px;"></div>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    @Html.Label("Project:", new { @class = "thick" })
+                                </div>
+                                <div class="col-sm-4">
+                                    <input class="custom-input" type="text" id="Project" name="ProjectDesc" value="@Model.InvoiceDetails.Project" style="width:500px" />
+                                </div>
+                                <div class="col-sm-2">
+                                    @Html.Label("Invoice #:", new { @class = "thick" })
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="normal">@Model.InvoiceDetails.InvoiceNo</label>
+                                </div>
+                            </div>
+                            <div style="height:5px;"></div>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    @Html.Label("Payment Due By:", new { @class = "thick" })
+                                </div>
+                                <div class="col-sm-2">
+                                    @(Html.Kendo().DatePicker()
+                                   .Name("datepicker")
+                                   .Value(@Model.InvoiceDetails.PaymentDueBy)
+                                   .Events(e => e.Change("OnDateChange"))
+                                   .HtmlAttributes(new { style = "width:150px;" }))
+                                </div>
+                                <div class="col-sm-2">
+                                </div>
+                                <div class="col-sm-2">
+                                    @Html.Label("Invoice Amount:", new { @class = "thick" })
+                                </div>
+                                <div class="col-sm-4">
+                                    <label for="LabelInvoiceAmount" class="normal">@(String.Format("{0:C}", Model.InvoiceDetails.InvoiceAmount))</label>
+                                </div>
+                            </div>
+                            <div style="height:5px;"></div>
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    @Html.Label("Contract Attest Threshold:", new { @class = "thick" })
+                                </div>
+                                <div class="col-sm-2">
+                                    @if (Model.InvoiceDetails.CATTThreshold == null)
+                                {
+                                    Model.InvoiceDetails.CATTThreshold = 0;
+                                }
+                                    @(Html.Kendo().DropDownList()
+                                 .Name("CATTThresholds")
+                                 .DataTextField("Text")
+                                 .DataValueField("Value")
+                                 .HtmlAttributes(new { style = "height:80%; margin:0px 0px 4px 0px;" })
+                                 .BindTo(new List<SelectListItem>() {
+                                     new SelectListItem() {
+                                     Text = "$0",
+                                      Value = "0"
+                                   },
+                                   new SelectListItem() {
+                                     Text = "$50K",
+                                     Value = "50000"
+                                    },
+                                  new SelectListItem() {
+                                     Text = "$100K",
+                                     Value = "100000"
+                                    }
+                               })
+                              .Value(@Model.InvoiceDetails.CATTThreshold.ToString())
+                              .ValuePrimitive(true)
+                              .Events(e => e.Change("OnThresholdChange")))
+                                </div>
+                                <div class="col-sm-2">
+                                    @if (Model.InvoiceDetails.CATTApprovalRequired == null)
+                                 {
+                                    Model.InvoiceDetails.CATTApprovalRequired = false;
+                                <label style="vertical-align:middle;font-weight:bold;line-height:15px"><input type='checkbox' style="vertical-align:bottom;" value=@Model.InvoiceDetails.CATTApprovalRequired.Value onclick='onCATTApprovalChange(this);'>Require CATT Approval</label>
+                                 }
+                                else
+                                 {
+                                <input type='checkbox' name="CheckBox" checked=@Model.InvoiceDetails.CATTApprovalRequired onclick='onCATTApprovalChange(this);'>
+                                <label id="lblCATT" style="vertical-align:middle;font-weight:bold;line-height:15px">  Require CATT Approval</label>
+                                 }
+                                </div>
+                                <div class="col-sm-2">
+                                    @Html.Label("Posted/Parked by:", new { @class = "thick" })
+                                </div>
+                                <div class="col-sm-4">
+                                    @Html.Label(@Model.InvoiceDetails.PostedParkedBy, new { @class = "normal" })
+                                </div>
+                            </div>
+                     </div>
+                </div>
+             }
+        </form>
+
+        <div class="row" id="defaultApproversTable">
+            <div class="col-sm-12">
+                @Html.Partial("~/Views/RoutingDetails/_EditableApproversGrid.cshtml", Model)
+            </div>
+        </div>
+
+        <div class="row" id="commentsAndAttachments">
+            <div class="col-sm-12">
+                @Html.Partial("~/Views/RoutingDetails/_EditableAttachmentsandComments.cshtml", Model)
+            </div>
+        </div>
+        <script id="confirmation" type="text/x-kendo-template">
+            <p display:inline-block>Are you sure you want to reject the eInvoice submission ?</p>
+            <p style="text-align:right">
+                <button class="confirm k-button">Yes</button>
+                <button class="cancel k-button">No</button>
+            </p>
+        </script>
+    </div>
+    
+    <script>
+
+        // SM 03/14/2016 - Show the correct DDL
+        //if (document.getElementById('chkNonContractingStatus').checked) {
+        var selectedValue = "-1";
+
+        var dropdown = $("#ddlInvoiceType").data("kendoDropDownList");
+        if (dropdown != null)
+            selectedValue = dropdown.value();
+        if (selectedValue == "NonContract") {
+            $('#spanDDLContract').hide();
+            $('#spanDDLManual').hide();
+            $('#spanDDLNonContract').show();
+            $("input[name='CheckBox']:checkbox").hide();
+            $('#lblCATT').hide();
+        }
+        else if (selectedValue == "Contract") {
+            $('#spanDDLContract').show();
+            $('#spanDDLNonContract').hide();
+            $('#spanDDLManual').hide();
+            $("input[name='CheckBox']:checkbox").show();
+            $('#lblCATT').show();
+        }
+        else if (selectedValue == "Manual") {
+            $('#spanDDLManual').show();
+            $('#spanDDLContract').hide();
+            $('#spanDDLNonContract').hide();
+            $("input[name='CheckBox']:checkbox").hide();
+            $('#lblCATT').hide();
+        }
+        //var status = decodeURI(getUrlVars()["status"]);
+        ////alert('Status:' + decodeURI(status))
+
+        //if (status == 'AP Review') {
+        //    //$("#ddlInvoiceType").data("kendoDropDownList").value("-1");
+        //    alert('Status:' + status)
+        //    $("#ddlInvoiceType").data("kendoDropDownList").select(0)
+        //}
+    </script>
+    
+</body>
+</html>
